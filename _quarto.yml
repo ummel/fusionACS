@@ -4,24 +4,19 @@ project:
 
 website:
   title: "fusionACS"
-  image: fusionACS_badge.jpg
   navbar:
+    logo: fusionACS_badge.jpg
     left:
       - text: "About"
-        href: about.qmd    # Links to your About page
+        href: about.qmd
       - text: "Details"
-        href: details.qmd    # Links to your About page
+        href: details.qmd
       - text: "Results"
-        href: results.qmd    # Links to your About page
+        href: results.qmd
       - text: "Team"
-        href: team.qmd    # Links to your Team page
+        href: team.qmd
       - text: "FAQ"
-        href: faq.qmd  # Links to your Contact page
-   author:
-    - name: "Kevin Ummel"
-      affiliation: "Greenspace Analytics"
-      email: "kevin.ummel@yale.edu"
-      github: "https://github.com/ummel"
+        href: faq.qmd
 
 format:
   html:
