@@ -143,8 +143,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">Overview</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -168,7 +174,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p>About this site</p>
+<section id="overview" class="level3">
+<h3 class="anchored" data-anchor-id="overview">Overview</h3>
+<p>A fusionACS <em>analysis</em> consists of a request for an <em>estimate</em> (mean, median, sum, proportion, or count) of a particular variable across one or more sub-populations. For example, “Mean household electricity consumption in Chicago, by census tract”; or “Proportion of low-income households in Atlanta without air conditioning”. In addition to a point estimate, fusionACS also returns the associated uncertainty or <em>margin of error</em>.</p>
+<p>There are two fundamental sources of uncertainty when performing an analysis using fusionACS data. First, there is uncertainty in the fused <em>outcomes</em> for ACS respondent households; i.e.&nbsp;uncertainty in the values predicted by the underlying machine learning models. Second, there is uncertainty in the assigned <em>weight</em> for each respondent; i.e.&nbsp;uncertainty about how often a sampled respondent “type” appears in the actual population.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span> <span class="sc">+</span> <span class="dv">1</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -177,6 +186,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 
 
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
