@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Home – fusionACS</title>
+<title>fusionACS</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -20,7 +20,27 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-</style>
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
 
 
 <script src="site_libs/quarto-nav/quarto-nav.js"></script>
@@ -93,16 +113,20 @@ ul.task-list li input[type="checkbox"] {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
-    <a class="nav-link" href="./about.html"> 
-<span class="menu-text">About</span></a>
+    <a class="nav-link" href="./methodology.html"> 
+<span class="menu-text">Methodology</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./details.html"> 
-<span class="menu-text">Details</span></a>
+    <a class="nav-link" href="./inputs.html"> 
+<span class="menu-text">Inputs</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./results.html"> 
-<span class="menu-text">Results</span></a>
+    <a class="nav-link" href="./outputs.html"> 
+<span class="menu-text">Outputs</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./publications.html"> 
+<span class="menu-text">Publications</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./team.html"> 
@@ -120,23 +144,33 @@ ul.task-list li input[type="checkbox"] {
     </nav>
 </header>
 <!-- content -->
-<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#project-overview" id="toc-project-overview" class="nav-link active" data-scroll-target="#project-overview">Project overview</a></li>
+  <li><a href="#methodology" id="toc-methodology" class="nav-link" data-scroll-target="#methodology">Methodology</a></li>
+  <li><a href="#inputs" id="toc-inputs" class="nav-link" data-scroll-target="#inputs">Inputs</a></li>
+  <li><a href="#outputs" id="toc-outputs" class="nav-link" data-scroll-target="#outputs">Outputs</a></li>
+  <li><a href="#use-cases" id="toc-use-cases" class="nav-link" data-scroll-target="#use-cases">Use cases</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
-<main class="content column-page" id="quarto-document-content">
+<main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Home</h1>
+<h1 class="title">fusionACS</h1>
 </div>
 
 
 
-<div class="quarto-title-meta column-page">
+<div class="quarto-title-meta">
 
     
   
@@ -148,11 +182,46 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<meta http-equiv="refresh" content="0; url=about.html">
+<section id="project-overview" class="level3">
+<h3 class="anchored" data-anchor-id="project-overview">Project overview</h3>
+<p>A large amount of data concerning the experiences and wellbeing of American households is collected by surveys. Household surveys typically focus on a single topic – e.g.&nbsp;finances, housing, health – and field independent and relatively small samples. As a result, data users are often constrained by the particular variables and spatial resolution available in a single survey.</p>
+<p>The fusionACS data science platform <span class="citation" data-cites="Ummel2024">(<a href="#ref-Ummel2024" role="doc-biblioref">Ummel et al. 2024</a>)</span> helps address this problem by statistically “fusing” microdata from disparate surveys to simulate a single, integrated, high-resolution survey. The resulting fused microdata can be used to perform analyses that would otherwise be impossible. At its core, fusionACS seeks to maximize the amount of useful information that can be extracted from the existing array of U.S. survey data.</p>
+</section>
+<section id="methodology" class="level3">
+<h3 class="anchored" data-anchor-id="methodology">Methodology</h3>
+<p>fusionACS uses the American Community Survey (ACS) – the largest U.S. household survey – as the “data backbone” of the fusion process. Variables in “donor” surveys are fused onto ACS Public Use Microdata Sample (PUMS) microdata to produce simulated values for variables unique to the donor. This generates probabilistic estimates of how ACS respondents might have answered a donor survey’s questionnaire. Respondent characteristics that are common to both the donor and the ACS (e.g.&nbsp;income, age, household size) – as well as spatial information that can be merged to both (e.g.&nbsp;characteristics of the local built environment) – are used as predictors variables in LightGBM machine learning models <span class="citation" data-cites="Ke2017">(<a href="#ref-Ke2017" role="doc-biblioref">Ke et al. 2017</a>)</span>.</p>
+<p>In 2025, an enhanced version of fusionACS was introduced that integrates UrbanPop, a synthetic population data product produced by Oak Ridge National Laboratory <span class="citation" data-cites="Tuccillo2023">(<a href="#ref-Tuccillo2023" role="doc-biblioref">Tuccillo et al. 2023</a>)</span>. UrbanPop provides probabilistic estimates of the location (block group) of each ACS respondent household. The fusionACS + UrbanPop platform is able to generate estimates for any donor survey variable for locales as small as individual census block groups.</p>
+<p>See the <a href="./methodology.html">Methodology page</a> for more information.</p>
+</section>
+<section id="inputs" class="level3">
+<h3 class="anchored" data-anchor-id="inputs">Inputs</h3>
+<p>To do…</p>
+<p>See the <a href="./inputs.html">Inputs page</a> for more information.</p>
+</section>
+<section id="outputs" class="level3">
+<h3 class="anchored" data-anchor-id="outputs">Outputs</h3>
+<p>To do…</p>
+<p>See the <a href="./outputs.html">Outputs page</a> for more information.</p>
+</section>
+<section id="use-cases" class="level3">
+<h3 class="anchored" data-anchor-id="use-cases">Use cases</h3>
+<p>See the <a href="./publications.html">Publications page</a> for more information.</p>
 
 
 
-</main> <!-- /main -->
+</section>
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-Ke2017" class="csl-entry" role="listitem">
+Ke, Guolin, Qi Meng, Thomas Finley, Taifeng Wang, Wei Chen, Weidong Ma, Qiwei Ye, and Tie-Yan Liu. 2017. <span>“LightGBM: A Highly Efficient Gradient Boosting Decision Tree.”</span> In <em>Advances in Neural Information Processing Systems 30</em>, 3149–57. <a href="https://papers.nips.cc/paper/6907-lightgbm-a-highly-efficient-gradient-boosting-decision-tree">https://papers.nips.cc/paper/6907-lightgbm-a-highly-efficient-gradient-boosting-decision-tree</a>.
+</div>
+<div id="ref-Tuccillo2023" class="csl-entry" role="listitem">
+Tuccillo, Joseph V., Robert Stewart, Amy Rose, Nathan Trombley, Jessica Moehl, Nicholas Nagle, and Budhendra Bhaduri. 2023. <span>“UrbanPop: A Spatial Microsimulation Framework for Exploring Demographic Influences on Human Dynamics.”</span> <em>Applied Geography</em> 151: 102844. <a href="https://doi.org/10.1016/j.apgeog.2022.102844">https://doi.org/10.1016/j.apgeog.2022.102844</a>.
+</div>
+<div id="ref-Ummel2024" class="csl-entry" role="listitem">
+Ummel, Kevin, Miguel Poblete-Cazenave, Karthik Akkiraju, Nick Graetz, Hero Ashman, Cora Kingdon, Steven Herrera Tenorio, Aaryaman Sunny Singhal, Daniel Aldana Cohen, and Narasimha D. Rao. 2024. <span>“Multidimensional Well-Being of US Households at a Fine Spatial Scale Using Fused Household Surveys.”</span> <em>Scientific Data</em> 11 (142). <a href="https://doi.org/10.1038/s41597-023-02788-7">https://doi.org/10.1038/s41597-023-02788-7</a>.
+</div>
+</div></section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";
