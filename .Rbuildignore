@@ -3,4 +3,4 @@
 ^dev$
 ^fusionACS_data$
 ^website$
-^.quarto
+^docs$

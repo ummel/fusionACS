@@ -3,6 +3,6 @@
 .RData
 .Ruserdata
 .Renviron
-/fusionACS_data
-/.quarto
-/dev
+/fusionACS_data/
+/.quarto/
+/dev/
