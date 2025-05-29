@@ -1,0 +1,6 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+^dev$
+^fusionACS_data$
+^website$
+^.quarto

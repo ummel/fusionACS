@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Methodology – fusionACS</title>
+<title>Data Outputs – fusionACS</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -20,27 +20,7 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-/* CSS for citations */
-div.csl-bib-body { }
-div.csl-entry {
-  clear: both;
-  margin-bottom: 0em;
-}
-.hanging-indent div.csl-entry {
-  margin-left:2em;
-  text-indent:-2em;
-}
-div.csl-left-margin {
-  min-width:2em;
-  float:left;
-}
-div.csl-right-inline {
-  margin-left:2em;
-  padding-left:1em;
-}
-div.csl-indent {
-  margin-left: 2em;
-}</style>
+</style>
 
 
 <script src="site_libs/quarto-nav/quarto-nav.js"></script>
@@ -88,35 +68,6 @@ div.csl-indent {
   }
 }</script>
 
-  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
-
-<script type="text/javascript">
-const typesetMath = (el) => {
-  if (window.MathJax) {
-    // MathJax Typeset
-    window.MathJax.typeset([el]);
-  } else if (window.katex) {
-    // KaTeX Render
-    var mathElements = el.getElementsByClassName("math");
-    var macros = [];
-    for (var i = 0; i < mathElements.length; i++) {
-      var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
-        window.katex.render(texText.data, mathElements[i], {
-          displayMode: mathElements[i].classList.contains('display'),
-          throwOnError: false,
-          macros: macros,
-          fleqn: false
-        });
-      }
-    }
-  }
-}
-window.Quarto = {
-  typesetMath
-};
-</script>
 
 <link rel="stylesheet" href="styles.css">
 </head>
@@ -142,24 +93,16 @@ window.Quarto = {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
-    <a class="nav-link active" href="./methodology.html" aria-current="page"> 
+    <a class="nav-link" href="./usage.html"> 
+<span class="menu-text">Usage</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./methodology.html"> 
 <span class="menu-text">Methodology</span></a>
-  </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="./inputs.html"> 
-<span class="menu-text">Inputs</span></a>
-  </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="./outputs.html"> 
-<span class="menu-text">Outputs</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./publications.html"> 
 <span class="menu-text">Publications</span></a>
-  </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="./team.html"> 
-<span class="menu-text">Team</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./faq.html"> 
@@ -181,14 +124,7 @@ window.Quarto = {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#estimating-uncertainty" id="toc-estimating-uncertainty" class="nav-link active" data-scroll-target="#estimating-uncertainty">Estimating uncertainty</a>
-  <ul class="collapse">
-  <li><a href="#pooled-variance" id="toc-pooled-variance" class="nav-link" data-scroll-target="#pooled-variance">Pooled variance</a></li>
-  <li><a href="#within-sample-standard-errors" id="toc-within-sample-standard-errors" class="nav-link" data-scroll-target="#within-sample-standard-errors">Within-sample standard errors</a></li>
-  <li><a href="#margin-of-error" id="toc-margin-of-error" class="nav-link" data-scroll-target="#margin-of-error">Margin of error</a></li>
-  </ul></li>
-  <li><a href="#computational-efficiency" id="toc-computational-efficiency" class="nav-link" data-scroll-target="#computational-efficiency">Computational efficiency</a></li>
-  <li><a href="#interpretation-of-uncertainty" id="toc-interpretation-of-uncertainty" class="nav-link" data-scroll-target="#interpretation-of-uncertainty">Interpretation of uncertainty</a></li>
+  <li><a href="#outputs" id="toc-outputs" class="nav-link active" data-scroll-target="#outputs">Outputs</a></li>
   </ul>
 </nav>
     </div>
@@ -197,7 +133,7 @@ window.Quarto = {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Methodology</h1>
+<h1 class="title">Data Outputs</h1>
 </div>
 
 
@@ -214,105 +150,14 @@ window.Quarto = {
 </header>
 
 
-<section id="estimating-uncertainty" class="level2">
-<h2 class="anchored" data-anchor-id="estimating-uncertainty">Estimating uncertainty</h2>
-<p>A fusionACS <em>analysis</em> consists of a request for an <em>estimate</em> (mean, median, sum, proportion, or count) of a particular variable across one or more sub-populations. For example, “Mean household electricity consumption in Chicago, by census tract”; or “Proportion of low-income households in Atlanta without air conditioning”. In addition to a point estimate, fusionACS also returns the associated uncertainty or <em>margin of error</em>.</p>
-<p>There are two fundamental sources of uncertainty when performing an analysis using fusionACS data. First, there is uncertainty in the fused <em>outcomes</em> for ACS respondent households; i.e.&nbsp;uncertainty in the values predicted by the underlying machine learning models. Second, there is uncertainty in the assigned <em>weight</em> for each respondent; i.e.&nbsp;uncertainty about how often a sampled respondent “type” appears in the actual population.</p>
-<p>Outcome uncertainty is captured through the production of <em>M</em> unique <em>implicates</em> during the fusion process; each implicate is a plausible simulation of the fused variables given uncertainty in the underlying models. Weighting uncertainty is captured through the use of <em>R</em> unique <em>replicates</em>; each replicate provides plausible household sample weights given uncertainty in the characteristics of the population.</p>
-<p>Taken together, a fusionACS analysis computes across <span class="math inline">\(k = M \cdot R\)</span> unique <em>samples</em>, each representing a plausible combination of outcomes and weights.</p>
-<section id="pooled-variance" class="level3">
-<h3 class="anchored" data-anchor-id="pooled-variance">Pooled variance</h3>
-<p>For any given fusionACS analysis, the point estimates and associated margin of error are calculated using the technique of <span class="citation" data-cites="Rubin1987">Rubin (<a href="#ref-Rubin1987" role="doc-biblioref">1987</a>)</span>. The point estimate, <span class="math inline">\(\bar{\theta}\)</span>, is the mean of the individual estimates calculated for each of the <span class="math inline">\(k\)</span> samples:</p>
-<p><span class="math display">\[
-\bar{\theta} = \frac{1}{k} \sum_{i=1}^{k} \hat{\theta}_i
-\]</span> The variance of <span class="math inline">\(\bar{\theta}\)</span> is calculated by “pooling” the variance both within and between samples:</p>
-<p><span class="math display">\[
-\text{Var}_{\text{combined}} = \frac{1}{k} \sum_{i=1}^{k} \text{Var}( \hat{\theta}_i ) + \left( 1 + \frac{1}{k} \right) \text{Var}_{\text{between}}
-\]</span> where <span class="math inline">\(\text{Var}_{\text{between}}\)</span> is the “between-sample” variance of the individual estimates:</p>
-<p><span class="math display">\[
-\text{Var}_{\text{between}} = \frac{1}{k - 1} \sum_{i=1}^{k} \left( \hat{\theta}_i - \bar{\theta} \right)^2
-\]</span></p>
-<p>and <span class="math inline">\(\text{Var}( \hat{\theta}_i )\)</span> refers to the “within-sample” variances of the individual estimates; i.e.&nbsp;the square of the standard error (<span class="math inline">\(\text{SE}( \hat{\theta} )^2\)</span>).</p>
-</section>
-<section id="within-sample-standard-errors" class="level3">
-<h3 class="anchored" data-anchor-id="within-sample-standard-errors">Within-sample standard errors</h3>
-<p>The calculation of within-sample standard errors depends on the type of estimate requested. To calculate the standard error of a mean estimate for a sample of <span class="math inline">\(n\)</span> observations with frequency weights <span class="math inline">\(w_i\)</span>:</p>
-<p><span class="math display">\[
-SE(\hat{\theta}_{\text{mean}}) = \sqrt{ \frac{ \sum w_i (x_i - \bar{x}_w)^2 }{ \sum w_i - 1 } \cdot \frac{1}{n_{\text{eff}}} }
-\]</span> where <span class="math inline">\(\bar{x}_w\)</span> is the weighted mean and <span class="math inline">\(n_{\text{eff}}\)</span> is the effective sample size calculated from the observation weights:</p>
-<p><span class="math display">\[
-n_{\text{eff}} = \frac{ \left( \sum w_i \right)^2 }{ \sum w_i^2 }
-\]</span></p>
-<p>The use of <span class="math inline">\(n_{\text{eff}}\)</span> (rather than sample size <span class="math inline">\(n\)</span>) accounts for additional uncertainty introduced by variance in the weights themselves. In general, the smaller the target population the greater the “unevenness” of the weights, leading to <span class="math inline">\(n_{\text{eff}}&lt;n\)</span>, and a corresponding increase in the standard error <span class="citation" data-cites="Kish1965 Lumley2010">(<a href="#ref-Kish1965" role="doc-biblioref">Kish 1965</a>; <a href="#ref-Lumley2010" role="doc-biblioref">Lumley 2010</a>)</span>.</p>
-<p>For medians, bootstrapping and <a href="https://stats.stackexchange.com/questions/99829/how-to-obtain-a-confidence-interval-for-a-percentile/284970#284970">non-parametric simulation</a> are possible but require significant computation <span class="citation" data-cites="Hahn1991">(<a href="#ref-Hahn1991" role="doc-biblioref">Hahn and Meeker 1991</a>)</span>. Given the necessity of computational efficiency in the fusionACS context, the standard error of the median instead uses the approximation of <span class="citation" data-cites="Tukey1977">Tukey (<a href="#ref-Tukey1977" role="doc-biblioref">1977</a>)</span>:</p>
-<p><span class="math display">\[
-SE(\hat{\theta}_{\text{median}}) \approx SE(\hat{\theta}_{\text{mean}})  \cdot \frac{\pi}{2}
-\]</span></p>
-<p>To calculate the standard error of a proportion within a sample of <span class="math inline">\(n\)</span> observations with frequency weights <span class="math inline">\(w_i\)</span>:</p>
-<p><span class="math display">\[
-SE(\hat{\theta}_{\text{proportion}}) = \sqrt{ \frac{ \hat{p}(1 - \hat{p}) }{ n_{\text{eff}} } }
-\]</span></p>
-<p>where <span class="math inline">\(\hat{p}\)</span> is a (weighted) proportion estimated from the observed sample and <span class="math inline">\(n_{\text{eff}}\)</span> is calculated as above.</p>
-<p>For sums (numerical case) and counts (categorical case), the standard error is a multiple of the standard error of the mean and proportion, respectively:</p>
-<p><span class="math display">\[
-SE(\hat{\theta}_{\text{sum}}) = SE(\hat{\theta}_{\text{mean}}) \cdot \sum w_i
-\]</span></p>
-<p><span class="math display">\[
-SE(\hat{\theta}_{\text{count}}) = SE(\hat{\theta}_{\text{proportion}}) \cdot \sum w_i
-\]</span></p>
-</section>
-<section id="margin-of-error" class="level3">
-<h3 class="anchored" data-anchor-id="margin-of-error">Margin of error</h3>
-<p>Having calculated <span class="math inline">\(\text{Var}_{\text{combined}}\)</span> and its component variances, the degrees of freedom is calculated using the formula of <span class="citation" data-cites="Barnard1999">Barnard and Rubin (<a href="#ref-Barnard1999" role="doc-biblioref">1999</a>)</span>. Compared to the original <span class="citation" data-cites="Rubin1987">Rubin (<a href="#ref-Rubin1987" role="doc-biblioref">1987</a>)</span> degrees of freedom, this formulation allows for unequal within-sample variances and is more accurate for small samples.</p>
-<p><span class="math display">\[
-\nu = (k - 1) \left( 1 + \frac{ \frac{1}{k} \sum_{i=1}^{k} \text{Var}(\hat{\theta}_i) }{ \text{Var}_{\text{between}} } \right)^2
-\bigg/
-\left( \frac{1}{k - 1} + \frac{1}{k^2} \cdot \frac{ \sum_{i=1}^{k} \text{Var}(\hat{\theta}_i)^2 }{ \text{Var}_{\text{between}}^2 } \right)
-\]</span></p>
-<p>In keeping with the convention used by the U.S. Census Bureau for published ACS estimates, fusionACS returns both the 90% margin of error and the coefficient of variation.</p>
-<p><span class="math display">\[
-\text{ME}_{90\%} = t_{0.95, \, \nu} \cdot \sqrt{\text{Var}_{\text{combined}}}
-\]</span> <span class="math display">\[
-\text{CV} = 100 \times \frac{\text{ME}_{90\%} / 1.645}{|\bar{\theta}|}
-\]</span></p>
-<p>The latter provides a scale-independent measure of estimate reliability.</p>
-</section>
-</section>
-<section id="computational-efficiency" class="level2">
-<h2 class="anchored" data-anchor-id="computational-efficiency">Computational efficiency</h2>
-</section>
-<section id="interpretation-of-uncertainty" class="level2">
-<h2 class="anchored" data-anchor-id="interpretation-of-uncertainty">Interpretation of uncertainty</h2>
-<p>There is no universal standard for judging when the margin of error and/or coefficient of variation are “too high”. The answer always depends on the nature of the analysis and intended application. At a minimum, generalized guidelines should be used to determine when and if valid conclusions can be drawn from specific estimates; for example, see <span class="citation" data-cites="Parmenter2013">Parmenter and Lau (<a href="#ref-Parmenter2013" role="doc-biblioref">2013</a>)</span>, page 2.</p>
-<p>It is important that analyses or reports based on fusionACS data products communicate the authors’ chosen standards for determining when an estimate is sufficiently reliable to draw conclusions.</p>
-
+<section id="outputs" class="level3">
+<h3 class="anchored" data-anchor-id="outputs">Outputs</h3>
+<p>Data outputs available for visualization or download.</p>
 
 
 </section>
 
-<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
-<div id="ref-Barnard1999" class="csl-entry" role="listitem">
-Barnard, John, and Donald B. Rubin. 1999. <span>“Small-Sample Degrees of Freedom with Multiple Imputation.”</span> <em>Biometrika</em> 86 (4): 948–55. <a href="https://doi.org/10.1093/biomet/86.4.948">https://doi.org/10.1093/biomet/86.4.948</a>.
-</div>
-<div id="ref-Hahn1991" class="csl-entry" role="listitem">
-Hahn, G. J., and W. Q. Meeker. 1991. <em>Statistical Intervals: A Guide for Practitioners</em>. New York: Wiley.
-</div>
-<div id="ref-Kish1965" class="csl-entry" role="listitem">
-Kish, Leslie. 1965. <em>Survey Sampling</em>. Wiley Series in Probability and Mathematical Statistics. New York: Wiley.
-</div>
-<div id="ref-Lumley2010" class="csl-entry" role="listitem">
-Lumley, Thomas. 2010. <em>Complex Surveys: A Guide to Analysis Using r</em>. Wiley Series in Survey Methodology. Hoboken, NJ: Wiley. <a href="https://books.google.com/books?id=7skyokxvcEoC">https://books.google.com/books?id=7skyokxvcEoC</a>.
-</div>
-<div id="ref-Parmenter2013" class="csl-entry" role="listitem">
-Parmenter, Barbara M., and Janet Lau. 2013. <span>“Estimating and Mapping Reliability for American Community Survey Data.”</span> <a href="https://sites.tufts.edu/gis/files/2013/11/Amercian-Community-Survey_Margin-of-error-tutorial.pdf" class="uri">https://sites.tufts.edu/gis/files/2013/11/Amercian-Community-Survey_Margin-of-error-tutorial.pdf</a>.
-</div>
-<div id="ref-Rubin1987" class="csl-entry" role="listitem">
-Rubin, Donald B. 1987. <em>Multiple Imputation for Nonresponse in Surveys</em>. New York: Wiley.
-</div>
-<div id="ref-Tukey1977" class="csl-entry" role="listitem">
-Tukey, John W. 1977. <em>Exploratory Data Analysis</em>. Reading, MA: Addison-Wesley.
-</div>
-</div></section></div></main> <!-- /main -->
+</main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";

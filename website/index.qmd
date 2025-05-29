@@ -8,27 +8,26 @@ A large amount of data concerning the experiences and wellbeing of American hous
 
 The fusionACS data science platform [@Ummel2024] helps address this problem by statistically "fusing" microdata from disparate surveys to simulate a single, integrated, high-resolution survey. The resulting fused microdata can be used to perform analyses that would otherwise be impossible. At its core, fusionACS seeks to maximize the amount of useful information that can be extracted from the existing array of U.S. survey data.
 
+In 2025, an enhanced version of fusionACS was introduced that integrates UrbanPop, a synthetic population data product produced by Oak Ridge National Laboratory [@Tuccillo2023]. UrbanPop provides probabilistic estimates of the location (block group) of each ACS respondent household. The fusionACS + UrbanPop platform is able to generate estimates for any donor survey variable for locales as small as individual census block groups.
+
 ### Methodology
 
 fusionACS uses the American Community Survey (ACS) – the largest U.S. household survey – as the “data backbone” of the fusion process. Variables in "donor" surveys are fused onto ACS Public Use Microdata Sample (PUMS) microdata to produce simulated values for variables unique to the donor. This generates probabilistic estimates of how ACS respondents might have answered a donor survey’s questionnaire. Respondent characteristics that are common to both the donor and the ACS (e.g. income, age, household size) – as well as spatial information that can be merged to both (e.g. characteristics of the local built environment) – are used as predictors variables in LightGBM machine learning models [@Ke2017].
 
-In 2025, an enhanced version of fusionACS was introduced that integrates UrbanPop, a synthetic population data product produced by Oak Ridge National Laboratory [@Tuccillo2023]. UrbanPop provides probabilistic estimates of the location (block group) of each ACS respondent household. The fusionACS + UrbanPop platform is able to generate estimates for any donor survey variable for locales as small as individual census block groups.
-
 See the [Methodology page](methodology.qmd) for more information.
 
-### Inputs
+<!-- ### Inputs -->
 
-To do...
+<!-- To do... -->
 
-See the [Inputs page](inputs.qmd) for more information.
+<!-- See the [Inputs page](inputs.qmd) for more information. -->
 
-### Outputs
+<!-- ### Outputs -->
 
-To do...
+<!-- To do... -->
 
-See the [Outputs page](outputs.qmd) for more information.
+<!-- See the [Outputs page](outputs.qmd) for more information. -->
 
 ### Use cases
 
 See the [Publications page](publications.qmd) for more information.
-

@@ -9,16 +9,18 @@ website:
   navbar:
     logo: fusionACS_badge.jpg
     left:
+      - text: "Usage"
+        href: usage.qmd
       - text: "Methodology"
         href: methodology.qmd
-      - text: "Inputs"
-        href: inputs.qmd
-      - text: "Outputs"
-        href: outputs.qmd
+      #- text: "Inputs"
+      #  href: inputs.qmd
+      # - text: "Outputs"
+      #   href: outputs.qmd
       - text: "Publications"
         href: publications.qmd
-      - text: "Team"
-        href: team.qmd
+      # - text: "Team"
+      #   href: team.qmd
       - text: "FAQ"
         href: faq.qmd
 

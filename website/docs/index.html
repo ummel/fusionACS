@@ -113,24 +113,16 @@ div.csl-indent {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
+    <a class="nav-link" href="./usage.html"> 
+<span class="menu-text">Usage</span></a>
+  </li>  
+  <li class="nav-item">
     <a class="nav-link" href="./methodology.html"> 
 <span class="menu-text">Methodology</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./inputs.html"> 
-<span class="menu-text">Inputs</span></a>
-  </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="./outputs.html"> 
-<span class="menu-text">Outputs</span></a>
-  </li>  
-  <li class="nav-item">
     <a class="nav-link" href="./publications.html"> 
 <span class="menu-text">Publications</span></a>
-  </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="./team.html"> 
-<span class="menu-text">Team</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./faq.html"> 
@@ -154,8 +146,6 @@ div.csl-indent {
   <ul>
   <li><a href="#project-overview" id="toc-project-overview" class="nav-link active" data-scroll-target="#project-overview">Project overview</a></li>
   <li><a href="#methodology" id="toc-methodology" class="nav-link" data-scroll-target="#methodology">Methodology</a></li>
-  <li><a href="#inputs" id="toc-inputs" class="nav-link" data-scroll-target="#inputs">Inputs</a></li>
-  <li><a href="#outputs" id="toc-outputs" class="nav-link" data-scroll-target="#outputs">Outputs</a></li>
   <li><a href="#use-cases" id="toc-use-cases" class="nav-link" data-scroll-target="#use-cases">Use cases</a></li>
   </ul>
 </nav>
@@ -186,22 +176,18 @@ div.csl-indent {
 <h3 class="anchored" data-anchor-id="project-overview">Project overview</h3>
 <p>A large amount of data concerning the experiences and wellbeing of American households is collected by surveys. Household surveys typically focus on a single topic – e.g.&nbsp;finances, housing, health – and field independent and relatively small samples. As a result, data users are often constrained by the particular variables and spatial resolution available in a single survey.</p>
 <p>The fusionACS data science platform <span class="citation" data-cites="Ummel2024">(<a href="#ref-Ummel2024" role="doc-biblioref">Ummel et al. 2024</a>)</span> helps address this problem by statistically “fusing” microdata from disparate surveys to simulate a single, integrated, high-resolution survey. The resulting fused microdata can be used to perform analyses that would otherwise be impossible. At its core, fusionACS seeks to maximize the amount of useful information that can be extracted from the existing array of U.S. survey data.</p>
+<p>In 2025, an enhanced version of fusionACS was introduced that integrates UrbanPop, a synthetic population data product produced by Oak Ridge National Laboratory <span class="citation" data-cites="Tuccillo2023">(<a href="#ref-Tuccillo2023" role="doc-biblioref">Tuccillo et al. 2023</a>)</span>. UrbanPop provides probabilistic estimates of the location (block group) of each ACS respondent household. The fusionACS + UrbanPop platform is able to generate estimates for any donor survey variable for locales as small as individual census block groups.</p>
 </section>
 <section id="methodology" class="level3">
 <h3 class="anchored" data-anchor-id="methodology">Methodology</h3>
 <p>fusionACS uses the American Community Survey (ACS) – the largest U.S. household survey – as the “data backbone” of the fusion process. Variables in “donor” surveys are fused onto ACS Public Use Microdata Sample (PUMS) microdata to produce simulated values for variables unique to the donor. This generates probabilistic estimates of how ACS respondents might have answered a donor survey’s questionnaire. Respondent characteristics that are common to both the donor and the ACS (e.g.&nbsp;income, age, household size) – as well as spatial information that can be merged to both (e.g.&nbsp;characteristics of the local built environment) – are used as predictors variables in LightGBM machine learning models <span class="citation" data-cites="Ke2017">(<a href="#ref-Ke2017" role="doc-biblioref">Ke et al. 2017</a>)</span>.</p>
-<p>In 2025, an enhanced version of fusionACS was introduced that integrates UrbanPop, a synthetic population data product produced by Oak Ridge National Laboratory <span class="citation" data-cites="Tuccillo2023">(<a href="#ref-Tuccillo2023" role="doc-biblioref">Tuccillo et al. 2023</a>)</span>. UrbanPop provides probabilistic estimates of the location (block group) of each ACS respondent household. The fusionACS + UrbanPop platform is able to generate estimates for any donor survey variable for locales as small as individual census block groups.</p>
 <p>See the <a href="./methodology.html">Methodology page</a> for more information.</p>
-</section>
-<section id="inputs" class="level3">
-<h3 class="anchored" data-anchor-id="inputs">Inputs</h3>
-<p>To do…</p>
-<p>See the <a href="./inputs.html">Inputs page</a> for more information.</p>
-</section>
-<section id="outputs" class="level3">
-<h3 class="anchored" data-anchor-id="outputs">Outputs</h3>
-<p>To do…</p>
-<p>See the <a href="./outputs.html">Outputs page</a> for more information.</p>
+<!-- ### Inputs -->
+<!-- To do... -->
+<!-- See the [Inputs page](inputs.qmd) for more information. -->
+<!-- ### Outputs -->
+<!-- To do... -->
+<!-- See the [Outputs page](outputs.qmd) for more information. -->
 </section>
 <section id="use-cases" class="level3">
 <h3 class="anchored" data-anchor-id="use-cases">Use cases</h3>

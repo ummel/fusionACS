@@ -1,0 +1,115 @@
+---
+title: "Methodological Details"
+---
+
+## Estimating uncertainty
+
+A fusionACS *analysis* consists of a request for an *estimate* (mean, median, sum, proportion, or count) of a particular variable across one or more sub-populations. For example, "Mean household electricity consumption in Chicago, by census tract"; or "Proportion of low-income households in Atlanta without air conditioning".
+
+In addition to a point estimate, fusionACS also returns the associated uncertainty or *margin of error*. There are two fundamental sources of uncertainty when performing an analysis using fusionACS data. First, there is uncertainty in the fused *outcomes* for ACS respondent households; i.e. uncertainty in the values predicted by the underlying machine learning models. Second, there is uncertainty in the assigned *weight* for each respondent; i.e. uncertainty about how often a sampled respondent "type" appears in the population.
+
+Outcome uncertainty is captured through the production of *M* unique *implicates* during the fusion process; each implicate is a plausible simulation of the fused variables given uncertainty in the underlying models. Weighting uncertainty is captured through the use of *R* unique *replicates*; each replicate provides plausible household sample weights given uncertainty in the characteristics of the population.
+
+Taken together, a fusionACS analysis computes across $k = M \cdot R$ unique *samples*, each representing a plausible combination of outcomes and weights. By assessing the variance of these samples, it is possible to estimate the margin of error associated with any given point estimate.
+
+### Pooled variance
+
+For any given fusionACS analysis, the point estimates and associated margin of error are calculated using the technique of @Rubin1987. The point estimate, $\bar{\theta}$, is the mean of the individual estimates calculated for each of the $k$ samples:
+
+$$
+\bar{\theta} = \frac{1}{k} \sum_{i=1}^{k} \hat{\theta}_i
+$$ The variance of $\bar{\theta}$ is calculated by "pooling" the variance both within and between samples:
+
+$$
+\text{Var}_{\text{combined}} = \frac{1}{k} \sum_{i=1}^{k} \text{Var}( \hat{\theta}_i ) + \left( 1 + \frac{1}{k} \right) \text{Var}_{\text{between}}
+$$ 
+
+where $\text{Var}_{\text{between}}$ is the "between-sample" variance of the individual estimates:
+
+$$
+\text{Var}_{\text{between}} = \frac{1}{k - 1} \sum_{i=1}^{k} \left( \hat{\theta}_i - \bar{\theta} \right)^2
+$$
+
+and $\text{Var}( \hat{\theta}_i )$ refers to the "within-sample" variances of the $k$ individual estimates; i.e. the square of the standard error [$\text{SE}( \hat{\theta} )^2$].
+
+### Within-sample standard errors
+
+The calculation of within-sample standard errors depends on the type of estimate requested. To calculate the standard error of a mean estimate for a sample of $n$ observations with frequency weights $w_i$:
+
+$$
+SE(\hat{\theta}_{\text{mean}}) = \sqrt{ \frac{ \sum w_i (x_i - \bar{x}_w)^2 }{ \sum w_i - 1 } \cdot \frac{1}{n_{\text{eff}}} }
+$$where $\bar{x}_w$ is the weighted mean and $n_{\text{eff}}$ is the effective sample size calculated from the observation weights:
+
+$$
+n_{\text{eff}} = \frac{ \left( \sum w_i \right)^2 }{ \sum w_i^2 }
+$$
+
+The use of $n_{\text{eff}}$ (rather than sample size $n$) accounts for additional uncertainty introduced by variance in the weights themselves. In general, the smaller the target population the greater the "unevenness" of the weights, leading to $n_{\text{eff}}<n$, and a corresponding increase in the standard error [@Kish1965; @Lumley2010].
+
+The implementation in *R* uses the *collapse* package qsu() function [@Krantz2025], which computes the mean, standard deviation, and sum of weights in a single pass through the data in C/C++. This provides extremely fast calculation, even when the data is grouped across $k$ samples and (optionally) user-specified sub-populations.
+
+For median estimates, calculation of the standard error via bootstrapping requires significant computation [@Hahn1991]. Given the need for computational efficiency in the fusionACS context, the standard error of the median is instead estimated using the large-sample approximation:
+
+$$
+SE(\hat{\theta}_{\text{median}}) \approx \frac{1}{2f(m)} \cdot \frac{1}{\sqrt{n_{\text{eff}}}}
+$$
+where $f(m)$ is the density at the median. The formula arises from the asymptotic variance of sample quantiles under regularity conditions [@Serfling1980]. For speed, $f(m)$ is approximated using a finite difference of the quantile function [@Koenker2005]:
+
+$$
+f(m) \approx \frac{p_2 - p_1}{Q(p_2) - Q(p_1)}
+$$
+
+where $Q(p)$ is the weighted quantile function, and $p_1$ and $p_2$ are probabilities close to the median (0.475 and 0.525 by default). Implementation via the *collapse* package leverages a single, radix-based ordering of the input to efficiently compute the median, $Q(p_1)$, and $Q(p_2)$. This allows the standard error to be estimated at little additional cost beyond computation of the median itself. If $f(m)$ is undefined, the code falls back to the conservative approximation of @Tukey1977:
+
+$$
+SE(\hat{\theta}_{\text{median}}) \approx SE(\hat{\theta}_{\text{mean}})  \cdot \frac{\pi}{2}
+$$
+To calculate the standard error of a proportion, given the previously-defined effective sample size:
+
+$$
+SE(\hat{\theta}_{\text{proportion}}) = \sqrt{ \frac{ \hat{p}^*(1 - \hat{p}^*) }{ n_{\text{eff}} } }
+$$
+
+where $\hat{p}^*$ is the Agresti-Coull [@Agresti1998] adjusted proportion derived from the weighted sample proportion ($\hat{p}$), assuming a 90% confidence interval ($z=1.645$):
+
+$$
+\hat{p}^* = \frac{ \hat{p} \cdot n_{\text{eff}} + \frac{z^2}{2} }{ n_{\text{eff}} + z^2 }
+$$
+
+This adjustment ensures a non-zero standard error when $\hat{p}(1 - \hat{p})$ is zero; e.g. for unobserved outcomes in smaller samples. The un-adjusted sample proportion ($\hat{p}$) is always returned as the point estimate.
+
+For sums (numerical case) and counts (categorical case), the standard error is a multiple of the standard error of the mean and proportion, respectively:
+
+$$
+SE(\hat{\theta}_{\text{sum}}) = SE(\hat{\theta}_{\text{mean}}) \cdot \sum w_i
+$$
+
+$$
+SE(\hat{\theta}_{\text{count}}) = SE(\hat{\theta}_{\text{proportion}}) \cdot \sum w_i
+$$
+
+### Margin of error
+
+Having calculated $\text{Var}_{\text{combined}}$ and its component variances, the degrees of freedom is calculated using the formula of @Barnard1999. Compared to the original @Rubin1987 degrees of freedom, this formulation allows for unequal within-sample variances and is more accurate for small samples.
+
+$$
+\nu = (k - 1) \left( 1 + \frac{ \frac{1}{k} \sum_{i=1}^{k} \text{Var}(\hat{\theta}_i) }{ \text{Var}_{\text{between}} } \right)^2
+\bigg/
+\left( \frac{1}{k - 1} + \frac{1}{k^2} \cdot \frac{ \sum_{i=1}^{k} \text{Var}(\hat{\theta}_i)^2 }{ \text{Var}_{\text{between}}^2 } \right)
+$$
+
+In keeping with the convention used by the U.S. Census Bureau for published ACS estimates, fusionACS returns the 90% margin of error and the coefficient of variation.
+
+$$
+\text{ME}_{90\%} = t_{0.95, \, \nu} \cdot \sqrt{\text{Var}_{\text{combined}}}
+$$ 
+$$
+\text{CV} = 100 \times \frac{\text{ME}_{90\%} / 1.645}{|\bar{\theta}|}
+$$
+The latter provides a scale-independent measure of estimate reliability.
+
+## Interpretation of uncertainty
+
+There is no universal standard for judging when the margin of error and/or coefficient of variation are "too high". The answer always depends on the nature of the analysis and intended application. At a minimum, generalized guidelines should be used to determine when and if valid conclusions can be drawn from specific estimates; for example, see @Parmenter2013, page 2.
+
+It is important that analyses or reports based on fusionACS data products communicate the authors’ chosen standards for determining when an estimate is sufficiently reliable to draw conclusions.

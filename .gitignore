@@ -2,5 +2,7 @@
 .Rhistory
 .RData
 .Ruserdata
-/.quarto/
-/_site/
+.Renviron
+/fusionACS_data
+/.quarto
+/dev
