@@ -4,10 +4,10 @@
 \alias{get_microdata}
 \title{Download fusionACS microdata}
 \usage{
-get_microdata(tag = "latest")
+get_microdata(version = "latest", overwrite = FALSE)
 }
 \arguments{
-\item{tag}{Tag of the desired GitHub release. Defaults to the latest (i.e. most recent) microdata release. Passed to \code{\link[piggyback:pb_download]{pb_download}} internally.}
+\item{version}{Version (release date) of the desired GitHub release. Defaults to the latest (i.e. most recent) microdata release. Passed to \code{\link[piggyback:pb_download]{pb_download}} internally.}
 }
 \value{
 Message to console if successful.
