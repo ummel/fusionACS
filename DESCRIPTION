@@ -1,6 +1,6 @@
 Package: fusionACS
 Title: To do.
-Version: 0.0.1
+Version: 0.0.2
 Authors@R: 
     person("Kevin", "Ummel", , "kevin.ummel@yale.edu", role = c("aut", "cre"))
 Description: To do.
