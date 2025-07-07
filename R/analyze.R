@@ -165,8 +165,6 @@ analyze <- function(data,
 
   #---
 
-
-
   # Prepare and check 'analyses' input
   #if (!is.list(analyses)) analyses <- list(analyses)
 
@@ -238,20 +236,41 @@ analyze <- function(data,
   bvars <- unique(unlist(blist))
   #print(blist)
 
-  #---
-
   # An analysis variable cannot be in 'by'
   err <- intersect(avars, bvars)
   if (length(err)) stop("Analysis variables cannot also be in the 'by' argument: ", paste(err, collapse = ", "))
 
+  # Universal variables that MUST be present in 'data', both before and after fun() is applied
+  ureq <- c('year', 'hid', 'pid', 'weight')
+  if (all(c('year', 'hid') %in% names(data)) & nrow(data) == uniqueN(data, by = c('year', 'hid'))) ureq <- setdiff(ureq, 'pid')
+  miss <- setdiff(ureq, names(data))
+  miss <- if ('hid' %in% miss) sub('^pid$', 'pid (possibly)', miss)
+  if (length(miss)) stop("The following required variables are missing from 'data':\n", paste(miss, collapse = "\n"))
+
+  #---
+
   # If user 'fun' is supplied, attempt to apply it to 'data'
+  # Note that the input universal variable values are enforced in the output
   # TO DO: For production, fun() should be applied by implicate (M)
-  if (is.function(fun)) {
+  if (!is.null(fun)) {
     cat("Applying user 'fun' to 'data'\n")
     data <- fun(data)
-    stopifnot(is.data.frame(data))  # Checks need to be more exhaustive
-    cat("Successfully applied user 'fun' to 'data'\n")
+    if (!is.data.frame(data)) stop("The supplied 'fun' does not return a data frame")
   }
+
+  # Check that 'data' has all the required variables
+  # This check comes after applying fun(), since the necessary variables could be added via fun()
+  miss <- setdiff(c(ureq, avars, bvars), names(data))  # Check for missing required variables, including 'by' variables
+  if (length(miss)) {
+    if (is.null(fun)) {
+      stop("The following required variables are missing from 'data':\n", paste(miss, collapse = "\n"))
+    } else {
+      stop("The supplied 'fun' does not return the following required variables:\n", paste(miss, collapse = "\n"))
+    }
+  }
+
+  # Success message
+  if (!is.null(fun)) cat("Successfully applied user 'fun' to 'data'\n")
 
   #---
 
@@ -839,14 +858,23 @@ analyze <- function(data,
     # Arranges row order of output
     arrange(i, !!!rlang::syms(bvars), level) %>%
 
-    # Clean up precision and typing
-    mutate_all(tidyr::replace_na, replace = NA) %>%  # Replaces NaN from zero division with normal NA
+    # Replace NaN from zero division with normal NA
+    mutate_all(tidyr::replace_na, replace = NA) %>%
+
+    # Convert data types, preserving leading zeros in strings (e.g. '012345')
+    # Useful for character grouping variables that can be typed as integer, logical, etc.
+    mutate_all(~ if (any(grepl("^0[0-9]+$", .x) & .x != "0")) {as.character(.x)} else {type.convert(.x, as.is = TRUE)}) %>%
+
+    # Clean up precision and integer type
     mutate_if(is.double, convertInteger, threshold = 1) %>%
     mutate_if(is.double, signif, digits = 5) %>%
 
     # Select final variables
     #select(lhs, rhs, type, all_of(bvars), level, N_eff, est, moe, se, df, cv) %>%
     select(lhs, rhs, type, all_of(bvars), level, N_eff, ubar, b, est, moe, se, df, cv) %>%
+
+    # !!!!TEMPORARY - return only subset of results
+    select(lhs, rhs, type, all_of(bvars), level, N_eff, est, moe, cv) %>%
 
     # setattr(name = "var_source", value = var.sources) %>%
     # setattr(name = "analyze_call", value = mcall) %>%
