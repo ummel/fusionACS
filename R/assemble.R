@@ -58,6 +58,14 @@
 #
 # dim(test2 %>% filter(state == '48', schl >= "Bachelor's degree"))
 
+# For testing/de-bugging
+# variables = c('np', 'wagp', 'hotma', 'zcta10')
+# variables = c('np', 'wagp', 'hotma', 'state')
+# year = 2015:2016
+# respondent = "household"
+# directory = get_directory()
+# cores = 1
+
 #-----
 
 assemble <- function(variables,
@@ -90,7 +98,7 @@ assemble <- function(variables,
   rtype <- ifelse(respondent == "household", "H", "P")
 
   # Check the 'cores' argument
-  if (!length(cores) == 1 | !cores[1] %in% 1:arrow::cpu_count()) stop("Invalid 'cores' argument")
+  if (!length(cores) == 1 | !cores[1] %in% 1:parallel::detectCores(logical = TRUE)) stop("Invalid 'cores' argument")
   arrow::set_cpu_count(cores)
 
   # Universal variables always returned in output, if possible
@@ -107,9 +115,7 @@ assemble <- function(variables,
   svars <- unlist(lapply(dots$select, function(x) all.vars(rlang::quo_get_expr(x))))
 
   # If there is an invalid select() expression, report with as error
-  if (length(dots$invalid)) {
-    stop("Invalid select() expressions in `...`. Only negations (-) are allowed:\n", paste(dots$invalid, collapse = "\n"))
-  }
+  if (length(dots$invalid)) stop("Invalid select() expressions in `...`. Only negations (-) are allowed:\n", paste(dots$invalid, collapse = "\n"))
 
   # Check for circular mutate() expressions
   if (length(mvars) & all(mvars %in% names(mvars))) stop("It looks like the mutate() calls in `...` are circular.")
@@ -132,16 +138,17 @@ assemble <- function(variables,
 
   # Attempt to assemble dictionary
   dict <- try(fusionACS::dictionary(directory = path), silent = TRUE)
-  if (inherits(dict, "try-error")) stop("Failed to access the database dictionary. Are you sure 'database' is correct?\n", dict)
+  if (inherits(dict, "try-error")) stop("Failed to access the database dictionary. Are you sure 'directory' is correct?\n", dict)
 
   # Check that the 'variables' are present in the dictionary/database
   vmiss <- setdiff(variables, dict$variable)
   if (length(vmiss)) stop("The following variable(s) are not in the database dictionary:\n", paste(vmiss, collapse = "\n"))
 
   # Check that the 'variables' are available for all of the 'year'
+  # If a variable has NA for 'years' in the dictionary, it is allowed (assumed to be a geographic variable)
   ymiss <- dict %>%
     filter(variable %in% variables) %>%
-    mutate(year_miss = lapply(years, function(x) setdiff(year, x))) %>%
+    mutate(year_miss = lapply(years, function(x) if (is.na(x[1])) numeric() else setdiff(year, x))) %>%
     filter(lengths(year_miss) > 0)
   if (nrow(ymiss) > 0) {
     ymiss <- paste(paste0(ymiss$variable, " (", sapply(ymiss$year_miss, paste, collapse = ", "), ")"), collapse = "\n")
@@ -151,30 +158,37 @@ assemble <- function(variables,
   #---
 
   # Get directories of ACS Arrow datasets (ordered by priority)
+  # Priority ordering means that Person file comes first if respondent = 'person'
   adir <- list.files(path, pattern = "^ACS_", full.names = TRUE)
   adir <- adir[order(str_sub(adir, -9, -9) != rtype)]
 
   # Get directories of donor survey Arrow datasets (ordered by priority)
+  # !!! TO DO: Confirm the priority ordering is working as expected when more surveys (and person-level donors) are added
   midyear <- mean(as.numeric(year))
   ddir <- setdiff(list.files(path, pattern = "[HP].parquet$", full.names = TRUE), adir)
   #ddir <- grep("^(?!.*year=\\d{4}$).*", ddir, perl = TRUE, value = TRUE)
   ddir <- sort(ddir, decreasing = TRUE)
   ddir <- ddir[order(abs(as.numeric(str_sub(basename(ddir), -14, -11)) - midyear), str_sub(basename(ddir), -9, -9) != rtype)]
 
-  dlist <- c(ddir, adir)
+  # Names of variables in 'location' and 'geography' files
+  #ln <- names(open_dataset(file.path(directory, 'location.parquet')))
+  gn <- names(open_dataset(file.path(directory, 'geography.parquet')))
+
+  # List of file paths to process, possibly including 'location.parquet' and 'geography.parquet'
+  dlist <- c(ddir,
+             adir,
+             if (any(variables %in% gn)) file.path(directory, 'location.parquet'),
+             if (any(variables %in% setdiff(gn, 'bg10'))) file.path(directory, 'geography.parquet'))
+
   v <- c(variables, 'weight')
   out <- NULL
-
   for (s in dlist) {
     r <- str_sub(basename(s), -9, -9)
     d <- open_dataset(s)
-    if (any(v %in% names(d))) {
-      d <- d %>%
-        select(any_of(c(uvar, v))) %>%
-        filter(year %in% !!year)
-      if (r == "P" & rtype != "P") {
-        d <- filter(d, pid == 1L)  # Retains only the reference person record
-      }
+    if (any(c(v, 'bg10') %in% names(d))) {
+      d <- select(d, any_of(c(uvar, 'bg10', v)))
+      if ('year' %in% names(d)) d <- filter(d, year %in% !!year)  # Restricts to requested year(s)
+      if (r == "P" & rtype != "P") d <- filter(d, pid == 1L)  # Retains only the reference person record
       out[[s]] <- d
       v <- setdiff(v, names(d))
       if (length(v) == 0) break()
@@ -183,7 +197,7 @@ assemble <- function(variables,
 
   # Perform successive left joins, apply optional mutate() and filter() expressions, and collect the data
   out <- Reduce(function(x, y) {
-    by.vars <- Reduce(intersect, list(names(x), names(y), uvar))
+    by.vars <- Reduce(intersect, list(names(x), names(y), c(uvar, 'bg10')))
     left_join(x, y, by = by.vars)
   }, out) %>%
     dplyr::mutate(!!!dots$mutate) %>%  # mutate first in case any filtering variables need to be created
@@ -191,27 +205,39 @@ assemble <- function(variables,
     #dplyr::select(!!!dots$select) %>%  # Moved to after collect(); see explanation below
     collect()
 
-  # When arrow executes dplyr::filter(), it seems to work fine for == or %in% operators but not for <> on ordered factors.
-  # This doesn't appears to be an explicitly know bug, but similar issues have been noted with factors:
+  # When arrow executes dplyr::filter(), it seems to work fine for == or %in% operators but not for < or > on ordered factors.
+  # This doesn't appear to be an explicitly known bug, but similar issues have been noted with factors:
   # See here: https://github.com/apache/arrow/pull/43446
   # And here: https://github.com/apache/arrow/issues/40430
 
-  # NOTE: I think the issue may have something do with arrow's filter() following the recursive merged
+  # NOTE: I think the issue may have something do with arrow's filter() following the recursive merge
   # Small scale testing suggests <> operations on ordered factors generally work
 
-  # This is a kluge to ensure that any <> filter() operations are enforced after arrow collect(), just in case.
-  # It requires that select() not be called by arrow but only later, since columns may be needed to enforce the filter() conditions below
-  # This assumes that filter() calls by arrow are not incorrect -- only incomplete in the case of <> operators on ordered factors
+  # This is a kluge to ensure that all filter() operations are enforced via normal dplyr operation after arrow collect(), just in case.
+  # It requires that select() be called after arrow operations, since columns may be needed to enforce the filter() conditions.
+  # This assumes that filter() calls by arrow are not incorrect -- only omitted in the case of < or > operations on ordered factors.
   out <- out %>%
     dplyr::filter(!!!dots$filter) %>%
     dplyr::select(!!!dots$select)
 
   # Convert to data.table, add 'M' placeholder column, order columns, and set keys (all by reference)
-  out <- as.data.table(out)
+  setDT(out)
   out.cols <- intersect(c(uvar, 'weight', variables, names(dots$mutate)), names(out))
   if (rtype == "H") out.cols <- setdiff(out.cols, "pid")
-  out <- out[, ..out.cols]
+  drop.cols <- setdiff(names(out), out.cols)
+  out[, (drop.cols) := NULL]
+  setcolorder(out, out.cols)
   setkeyv(out, cols = intersect(uvar, names(out)))
+
+  # Assign variable labels
+  l <- dict %>%
+    filter(variable %in% setdiff(names(out), names(dots$mutate))) %>%  # This ensures no labels is supplied if a mutate() call generates a variable in the dictionary
+    mutate(label = paste0(" [Source: ", survey, " ", replace_na(vintage, ""), "]"),
+           label = paste0(description, ifelse(survey == "geography", "", label)),
+           label = gsub(" ]", "]", label, fixed = TRUE))
+  out <- labelled::set_variable_labels(out,
+                                       .labels = setNames(as.list(l$label), l$variable),
+                                       .strict = FALSE)
 
   return(out)
 
