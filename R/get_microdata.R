@@ -17,7 +17,7 @@ get_microdata <- function(version = "latest", overwrite = FALSE) {
   stopifnot(is.character(version), is.logical(overwrite))
   pbr <- piggyback::pb_releases("ummel/fusionACS")
   valid <- c('latest', pbr$tag_name)
-  if (!version %in% valid) stop("Invalid 'version' argument. Valid entries are:\n", paste(valid, collapse = "\n"))
+  if (!version %in% valid) cli_abort(c("Invalid 'version' argument. Valid entries are:", paste(valid, collapse = ", ")))
   tag <- ifelse(version == "latest", pbr$tag_name[1], version)
 
   # Identify correct download location
@@ -34,12 +34,12 @@ get_microdata <- function(version = "latest", overwrite = FALSE) {
     rname <- gsub(" ", "_", subset(pbr, tag_name == tag)$release_name, fixed = TRUE)  # Requested release name (as appears on disk)
     rname <- sub("_Data_", "_data_", rname)
     d <- list.dirs(data.dir, full.names = TRUE, recursive = FALSE)  # Current releases on disk
-    if (rname %in% basename(d)) stop("The requested version is already installed at:\n", d[basename(d) == rname], "\nUse 'overwrite = TRUE' to replace the data already on disk.")
+    if (rname %in% basename(d)) cli_abort("The requested version is already installed. Use 'overwrite = TRUE' to replace the data already on disk.")
   }
 
   # Download the .tar file for the latest release
   fname <- grep("^fusionACS_data", piggyback::pb_list(repo = "ummel/fusionACS", tag = tag)$file_name, value = TRUE)
-  if (length(fname) != 1) stop("Did not identify exactly one 'fusionACS_data' file to download from repository release.")
+  if (length(fname) != 1) cli_abort("Did not identify exactly one 'fusionACS_data' file to download from repository release.")
   piggyback::pb_download(file = fname,
                          dest = data.dir,
                          repo = "ummel/fusionACS",
@@ -52,17 +52,17 @@ get_microdata <- function(version = "latest", overwrite = FALSE) {
 
   # Extract the .tar file
   # If the same data version already exists, this will simply overwrite
-  cat("Extracting the downloaded .tar file\n")
+  cli_alert("Extracting the downloaded .tar file\n")
   utils::untar(tarfile = file.path(data.dir, fname), exdir = data.dir)
 
   # Remove the original .tar file
   unlink(file.path(data.dir, fname))
 
-  # Report where cat was stored
-  cat("Data saved to:", dir)
-
   # # Update the default data path in .Rprofile and report change
   set_directory(dir)
-  cat("\nThis is now the default fusionACS data directory. See: get_directory()")
+  cli_alert_success(paste0("Data saved to: ", dir, "\nThis is now the default fusionACS data directory. See ?get_directory"))
+
+  # This simply reports the dictionary summary
+  dictionary(verbose = TRUE)
 
 }

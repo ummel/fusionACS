@@ -7,7 +7,9 @@
 #' @export
 
 get_directory <- function() {
-  getOption("fusionACS.data_directory")
+  x <- getOption("fusionACS.data_directory")
+  if (is.null(x)) stop("No fusionACS microdata directory specified")
+  return(x)
 }
 
 #' @param dir Path to fusionACS data directory.
@@ -16,23 +18,27 @@ get_directory <- function() {
 
 set_directory <- function(dir) {
 
-  # Check if 'dir' exists
-  dir <- try(normalizePath(dir, winslash = "/", mustWork = TRUE), silent = TRUE)
-  if (inherits(dir, "try-error")) stop("Could not resolve 'dir' to a valid path")
+  if (!is.null(dir)) {
 
-  rprofile_path <- path.expand("~/.Rprofile")
-  option_line <- sprintf('options(fusionACS.data_directory = "%s")', dir)
+    # Check if 'dir' exists
+    dir <- try(normalizePath(dir, winslash = "/", mustWork = TRUE), silent = TRUE)
+    if (inherits(dir, "try-error")) stop("Could not resolve 'dir' to a valid path")
 
-  # Read existing .Rprofile if it exists
-  lines <- if (file.exists(rprofile_path)) readLines(rprofile_path) else character()
+    rprofile_path <- path.expand("~/.Rprofile")
+    option_line <- sprintf('options(fusionACS.data_directory = "%s")', dir)
 
-  # Remove any existing 'fusionACS.data_directory' options
-  lines <- lines[!grepl("^options\\(.*fusionACS\\.data_directory.*\\)", lines)]
+    # Read existing .Rprofile if it exists
+    lines <- if (file.exists(rprofile_path)) readLines(rprofile_path) else character()
 
-  # Add the new option setting to .Rprofile
-  lines <- c(lines, option_line)
-  lines <- lines[lines != ""]
-  writeLines(lines, rprofile_path)
+    # Remove any existing 'fusionACS.data_directory' options
+    lines <- lines[!grepl("^options\\(.*fusionACS\\.data_directory.*\\)", lines)]
+
+    # Add the new option setting to .Rprofile
+    lines <- c(lines, option_line)
+    lines <- lines[lines != ""]
+    writeLines(lines, rprofile_path)
+
+  }
 
   # Set the option in the current R session
   options(fusionACS.data_directory = dir)

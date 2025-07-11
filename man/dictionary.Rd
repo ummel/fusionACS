@@ -4,7 +4,7 @@
 \alias{dictionary}
 \title{Load fusionACS microdata dictionary}
 \usage{
-dictionary(directory = get_directory())
+dictionary(directory = get_directory(), verbose = FALSE)
 }
 \arguments{
 \item{directory}{Path to the local fusionACS data directory.}
@@ -14,13 +14,14 @@ A data frame with the following columns:
 \describe{
 \item{variable}{Variable name (column in microdata).}
 \item{description}{Variable description or definition.}
-\item{source_survey}{Acronym of the survey where the variable comes from.}
-\item{source_vintage}{Vintage of the survey where the variable comes from.}
+\item{survey}{Acronym of the survey where the variable comes from.}
+\item{vintage}{Vintage of the donor survey where the variable comes from (NA for ACS variables; see 'years' instead).}
 \item{respondent}{Does the variable apply to "household" or "person" microdata observations?}
-\item{acs_years}{Year(s) of ACS-PUMS microdata for which the variable is available.}
 \item{type}{The data type of the variable (e.g. integer).}
-\item{n_unique}{Number of unique values observed in the microdata.}
-\item{values}{Summary of the values found in the microdata. For numeric variables, returns the output of \code{\link[base]{summary}}. For categorical variables, returns the unique values/levels (each enclosed in '<>').}
+\item{n_values}{Number of unique values the variable exhibits.}
+\item{values}{Summary of the values found in the microdata. For numeric variables, returns the output of \code{\link[base]{summary}}. For categorical variables, returns a list of the unique values/levels.}
+\item{years}{Year(s) of ACS-PUMS microdata for which the variable is available.}
+\item{custom}{Logical indicating a 'custom' ACS variable created by the fusionACS team. See: https://github.com/ummel/fusionData/tree/master/survey-processed/ACS/custom}
 }
 }
 \description{

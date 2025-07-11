@@ -7,15 +7,15 @@ bibliography: references.bib
 link-citations: true
 ---
 
-The experimental fusionACS *R* package allows users to access and analyze a "pseudo-sample" of the complete fusionACS database stored within the Yale High Performance Computing facility.
+The experimental fusionACS *R* package allows users to access and analyze a "pseudo-sample" of the complete fusionACS database stored within the Yale High Performance Computing facility. The complete database -- consisting of multiple fusion implicates and integration of the ORNL UrbanPop synthetic population -- is prohibitively large for public dissemination and contains some data that cannot be released. The goal of the fusionACS package is to enable users to perform exploratory analysis, and design, refine, and test analyses using the full suite of variables available in the private database.
 
-The complete database is prohibitively large for public dissemination and includes some data that cannot be shared. The pseudo-sample is an approximately 5% sample of ACS respondents (households and persons) for the period 2015-2019. In addition to all variables found in the ACS, it also includes all variables fused from donor surveys -- currently limited to RECS 2020 for beta testing.
+The pseudo-sample contains a single record (observation) for each ACS respondent (households and persons) for the period 2015-2019. Each record includes actual/observed values for all variables in the ACS, as well as a single simulation of each variable fused from donor surveys. As a result, the pseudo-sample plausibly mimics how ACS respondents might have answered questions unique to the donor survey questionnaires.
 
-Importantly, the sample includes plausible geographic identifiers – from census region down to individual census tracts – for each ACS household, obtained by sampling the underlying UrbanPop data in a way that ensures that all tracts nationwide are represented.
+The sample also includes a range of plausible geographic variables – from census region down to individual block groups – for each ACS household. These are obtained by random sampling of the underlying UrbanPop data in such a way that all block groups nationwide are represented.
 
-Since the sample includes only a single fusion implicate, in addition to the other restrictions, the total amount of data released is only about 0.03% of the complete fusionACS database.
+While the sample data cannot be used to derive "final" estimates or the associated margin of error, it *can* be used to do just about everything else a user might normally do during the analysis development and prototyping stages. And for analyses that are not hyper-specific (i.e. involve a comparatively large number of observations) the estimates derived from the pseudo-sample will often be quite close to the true values computed on the full database.
 
-While the sample data cannot be used to derive valid estimates, it *can* be used to understand the structure of the data, perform exploratory analysis, and design, refine, and test analyses. Our hope is that, eventually, it will be possible to remotely execute a valid analysis -- designed and tested locally -- using the complete fusionACS database and return the full "production" results to the user.
+Our hope is that, eventually, it will be possible to remotely execute a valid analysis -- designed and tested locally -- using the complete fusionACS database and return the full "production" results to the user.
 
 ### Package install and setup
 
@@ -26,23 +26,28 @@ devtools::install_github("ummel/fusionACS")
 ```
 Load the package.
 
+```{r, echo = FALSE}
+# Set the directory to NULL so that
+try(unlink(fusionACS::get_directory(), recursive = TRUE), silent = TRUE)
+fusionACS::set_directory(NULL)
+try(devtools::unload("fusionACS"), silent = TRUE)
+```
+
 ``` {r}
 library(fusionACS)
 ```
-
 Download the latest fusionACS microdata psudeo-sample.
 
-``` r
+``` {r}
 get_microdata()
 ```
-
 The data is automatically downloaded to a system-specific (and project-independent) location identified by the ['rappdirs' package](https://rappdirs.r-lib.org/reference/user_data_dir.html). The path to the data files is accessible via `get_directory()`, but there is no particular reason to access it directly.
 
 ### Assemble microdata
 
 You can view the data dictionary to see which surveys, year, and variables are available.
 
-``` r
+``` {r}
 dict = dictionary()
 View(dict)
 ```
@@ -102,7 +107,8 @@ test <- analyze(
 
 test
 ```
-The result has a single row, because no sub-populations were requested in this example. The results include a point estimate (`est`), but this is only an approximation since it is computed using a fraction of the complete database. No margin of error (`moe`) is returned, because the pseudo-sample does not contain the multiple fusion implicates necessary to estimate uncertainty.
+
+The result has a single row, because no sub-populations were requested in this example. The results include a point estimate (`est`), but this is only an approximation since it is computed using a fraction of the complete database. No margin of error (`moe`) is returned, because the pseudo-sample lacks the multiple fusion implicates needed to properly estimate uncertainty.
 
 #### Example 2
 
@@ -127,13 +133,13 @@ subset(test, rhs == "median(btung_per_ft2)", select = c(ten, est))
 
 #### Example 3
 
-Mean and median natural gas consumption per square foot, calculated (separately) for population subgroups defined by: 1) housing tenure; 2) housing tenure and heating equipment; and 3) census tract. This example illustrates how flexible the `by` argument can be.
+Mean and median natural gas consumption per square foot, calculated (separately) for population subgroups defined by: 1) housing tenure; 2) housing tenure and census tract. This example illustrates how flexible the `by` argument can be.
 
 ``` {r}
 test <- analyze(
   data = my.data,
   ~ mean(btung_per_ft2),
   ~ median(btung_per_ft2),
-  by = list(ten, c(ten, equipm), c(state_name, county10, tract10))
+  by = list(ten, c(ten, tract10))
 )
 ```

@@ -12,16 +12,6 @@ name: pkgdown.yaml
 
 permissions: read-all
 
-reference:
-  examples: false  # Set this to false
-  # You can also set this if you want to explicitly NOT run \dontrun{} blocks
-  # run_dont_run: false
-  # If you have specific categories for your reference topics, they go here:
-  # - title: "Core Functions"
-  #   contents:
-  #     - some_function
-  #     - another_function
-
 jobs:
   pkgdown:
     runs-on: ubuntu-latest
@@ -47,7 +37,7 @@ jobs:
           needs: website
 
       - name: Build site
-        run: pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)
+        run: pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE, examples = FALSE)  # NOTE: Turned off Examples July 11 2025
         shell: Rscript {0}
 
       - name: Deploy to GitHub pages 🚀
