@@ -16,5 +16,5 @@ set_directory(dir)
 File path.
 }
 \description{
-The user does not generally need to use these functions, since \code{\link{get_data}} sets the default directory automatically.
+The user does not generally need to use these functions, since \code{\link{get_microdata}} sets the default directory automatically.
 }

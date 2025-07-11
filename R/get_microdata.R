@@ -51,6 +51,7 @@ get_microdata <- function(version = "latest", overwrite = FALSE) {
 
   # Extract the .tar file
   # If the same data version already exists, this will simply overwrite
+  cat("Extracting the downloaded .tar file\n")
   utils::untar(tarfile = file.path(data.dir, fname), exdir = data.dir)
 
   # Remove the original .tar file

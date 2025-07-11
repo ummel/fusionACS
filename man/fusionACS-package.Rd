@@ -4,13 +4,15 @@
 \name{fusionACS-package}
 \alias{fusionACS}
 \alias{fusionACS-package}
-\title{fusionACS: To do.}
+\title{fusionACS: Extensive and high-resolution microdata of U.S. households and individuals}
 \description{
-To do.
+This package provides access to data and tools to facilitate otherwise impossible U.S. social survey analyses. A documented pseudo-sample of the underlying fusionACS database is made available, along with functions to allow efficient microdata assembly and analysis. The fusionACS database is the result of statistical fusion of social survey microdata to simulate an extensive and high-resolution survey of U.S. households and individuals (Ummel et al. 2024, Tuccillo et al. 2023).
 }
 \seealso{
 Useful links:
 \itemize{
+  \item \url{https://ummel.github.io/fusionACS}
+  \item \url{https://github.com/ummel/fusionACS}
   \item \url{https://ummel.github.io/fusionACS/}
 }
 

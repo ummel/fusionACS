@@ -24,7 +24,7 @@ assemble(
 
 \item{directory}{Character. Path to the local fusionACS data directory. This is typically created automatically by \link{get_microdata}.}
 
-\item{cores}{Integer. Number of compute cores used by \link[arrow:arrow-package]{arrow} when assembling microdata. The default is one less than the total available cores.}
+\item{cores}{Integer. Number of cores used for multithreading in \link[arrow:arrow-package]{arrow} operations when assembling microdata. The default is one less than the total available cores.}
 }
 \value{
 A keyed \link[data.table:data.table]{data.table} containing the requested \code{variables}, as well as the following universal variables (always returned):

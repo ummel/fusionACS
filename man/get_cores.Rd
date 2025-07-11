@@ -16,5 +16,5 @@ set_cores(n)
 Number of cores to use.
 }
 \description{
-Control the number of cores used by fusionACS for parallel processing. The default (set at package load) is one less than the total number of cores detected.
+Control the number of cores used by fusionACS for parallel processing. The default (set at package load) is one less than the total number of cores detected by \link[parallelly::availableCores]{availableCores}, which is generally accurate for both local machines and high-performance compute (HPC) clusters.
 }

@@ -1,6 +1,6 @@
 #' Get and set the default fusionACS microdata directory
 #'
-#' The user does not generally need to use these functions, since \code{\link{get_data}} sets the default directory automatically.
+#' The user does not generally need to use these functions, since \code{\link{get_microdata}} sets the default directory automatically.
 #'
 #' @return File path.
 #' @name get_directory

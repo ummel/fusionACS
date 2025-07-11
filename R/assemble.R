@@ -7,7 +7,7 @@
 #' @param respondent Character. Whether to return "household" or "person" microdata; i.e. the type of survey respondent. When \code{respondent = "household"}, any person-level \code{variables} return the response for the head of household (i.e. reference person). When \code{respondent = "person"}, any household-level \code{variables} are replicated for each person within a household.
 #' @param ... Optional expressions passed to [mutate][dplyr::mutate] to create new columns, [filter][dplyr::filter] to subset rows, or [select][dplyr::select] to remove variables (usually after a mutate). See Examples.
 #' @param directory Character. Path to the local fusionACS data directory. This is typically created automatically by \link{get_microdata}.
-#' @param cores Integer. Number of compute cores used by [arrow][arrow::arrow] when assembling microdata. The default is one less than the total available cores.
+#' @param cores Integer. Number of cores used for multithreading in [arrow][arrow::arrow] operations when assembling microdata. The default is one less than the total available cores.
 #'
 #' @return A keyed [data.table][data.table::data.table] containing the requested \code{variables}, as well as the following universal variables (always returned):
 #' \describe{

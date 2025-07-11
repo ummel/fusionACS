@@ -1,6 +1,6 @@
 #' Get and set the number of cores
 #'
-#' Control the number of cores used by fusionACS for parallel processing. The default (set at package load) is one less than the total number of cores detected.
+#' Control the number of cores used by fusionACS for parallel processing. The default (set at package load) is one less than the total number of cores detected by \link[parallelly::availableCores]{availableCores}, which is generally accurate for both local machines and high-performance compute (HPC) clusters.
 #'
 #' @return  Number of cores to use.
 #' @name get_cores
@@ -18,8 +18,8 @@ set_cores <- function(n) {
 
   # Default behavior: one less than the total detected
   if (missing(n)) {
-    n <- parallel::detectCores(logical = FALSE)
-    if (is.na(n)) n <- parallel::detectCores(logical = TRUE)
+    n <- parallelly::availableCores(logical = FALSE)
+    if (is.na(n)) n <- parallelly::availableCores(logical = TRUE)
     n <- max(1, n - 1L)
   }
 

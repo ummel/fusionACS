@@ -1,11 +1,10 @@
 Package: fusionACS
-Title: To do.
-Version: 0.0.2
-Authors@R: 
-    person("Kevin", "Ummel", , "kevin.ummel@yale.edu", role = c("aut", "cre"))
-Description: To do.
+Title: Extensive and high-resolution microdata of U.S. households and individuals
+Version: 0.0.12
+Authors@R: c(person("Kevin", "Ummel", email = "kevin.ummel@yale.edu", role = c("aut", "cre")))
+Description: This package provides access to data and tools to facilitate otherwise impossible U.S. social survey analyses. A documented pseudo-sample of the underlying fusionACS database is made available, along with functions to allow efficient microdata assembly and analysis. The fusionACS database is the result of statistical fusion of social survey microdata to simulate an extensive and high-resolution survey of U.S. households and individuals (Ummel et al. 2024, Tuccillo et al. 2023).
 License: GPL (>= 3)
-URL: https://ummel.github.io/fusionACS/
+URL: https://ummel.github.io/fusionACS, https://github.com/ummel/fusionACS
 Depends: 
     R (>= 3.5.0)
 Imports: 
@@ -13,8 +12,10 @@ Imports:
     collapse,
     data.table,
     dplyr,
-    ellmer,
-    fst,
+    parallelly,
+    labelled,
+    piggyback,
+    rappdirs,
     stringr,
     rlang
 Encoding: UTF-8
