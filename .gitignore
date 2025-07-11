@@ -6,4 +6,5 @@
 .Rbuildignore
 /fusionACS_data/
 /dev/
+/docs/
 README.html

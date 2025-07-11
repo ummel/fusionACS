@@ -1,9 +1,8 @@
 Package: fusionACS
-Title: Extensive and high-resolution microdata of U.S. households and
-    individuals
-Version: 0.0.12
-Authors@R: 
-    person("Kevin", "Ummel", , "kevin.ummel@yale.edu", role = c("aut", "cre"))
+Title: Integrated, extensive, and high-resolution microdata of U.S. households and individuals
+Version: 0.0.1
+Authors@R: c(person("Kevin", "Ummel", , "kevin.ummel@yale.edu", role = c("aut", "cre")),
+    person("Karthik", "Akkiraju", , "karthik.akkiraju@yale.edu", role = "ctb"))
 Description: This package provides access to data and tools to facilitate
     otherwise impossible U.S. social survey analyses. A documented
     pseudo-sample of the underlying fusionACS database is made available,
