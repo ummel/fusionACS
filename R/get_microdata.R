@@ -3,6 +3,7 @@
 #' By default, the latest (i.e. most recent) \href{https://github.com/ummel/fusionACS/releases}{microdata release} is downloaded to the \link[rappdirs:user_data_dir]{user data directory}. The default directory path is updated automatically and accessible via \code{\link{get_directory}}.
 #'
 #' @param version Version (release date) of the desired GitHub release. Defaults to the latest (i.e. most recent) microdata release. Passed to \code{\link[piggyback:pb_download]{pb_download}} internally.
+#' @param overwrite Logical. Can existing version on disk be overwritten?
 #' @return Message to console if successful.
 #' @examples
 #' \dontrun{
@@ -14,7 +15,7 @@ get_microdata <- function(version = "latest", overwrite = FALSE) {
 
   # Check inputs
   stopifnot(is.character(version), is.logical(overwrite))
-  pbr <- pb_releases("ummel/fusionACS")
+  pbr <- piggyback::pb_releases("ummel/fusionACS")
   valid <- c('latest', pbr$tag_name)
   if (!version %in% valid) stop("Invalid 'version' argument. Valid entries are:\n", paste(valid, collapse = "\n"))
   tag <- ifelse(version == "latest", pbr$tag_name[1], version)

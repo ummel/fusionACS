@@ -8,6 +8,8 @@ get_microdata(version = "latest", overwrite = FALSE)
 }
 \arguments{
 \item{version}{Version (release date) of the desired GitHub release. Defaults to the latest (i.e. most recent) microdata release. Passed to \code{\link[piggyback:pb_download]{pb_download}} internally.}
+
+\item{overwrite}{Logical. Can existing version on disk be overwritten?}
 }
 \value{
 Message to console if successful.

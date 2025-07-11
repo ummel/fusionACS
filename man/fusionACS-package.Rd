@@ -13,7 +13,6 @@ Useful links:
 \itemize{
   \item \url{https://ummel.github.io/fusionACS}
   \item \url{https://github.com/ummel/fusionACS}
-  \item \url{https://ummel.github.io/fusionACS/}
 }
 
 }
