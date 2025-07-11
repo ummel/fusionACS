@@ -1,0 +1,54 @@
+url: https://ummel.github.io/fusionACS/
+destination: docs
+
+template:
+  bootstrap: 5
+  bootswatch: cosmo
+
+home:
+  title: "fusionACS"
+  intro: README.md
+  strip_header: true
+  links:
+    - text: "Report a bug"
+      href: "https://github.com/ummel/fusionACS/issues"
+    - text: "fusionModel repository"
+      href: "https://github.com/ummel/fusionModel"
+    - text: "fusionData repository"
+      href: "https://github.com/ummel/fusionData"
+  sidebar:
+    structure:
+      - logo
+      - links
+      - authors
+      - citation
+      - license
+    components:
+      logo:
+        title: "" # Or provide a title like "Package Logo"
+        text: |
+          <div class="pkgdown-sidebar-logo">
+            <a href="https://ummel.github.io/fusionACS/">
+              <img src="man/figures/logo.jpg" alt="fusionACS website" style="max-width: 100%; height: auto;">
+            </a>
+          </div>
+
+navbar:
+  bg: "secondary" # Can be "dark", "light", "primary", or other Bootstrap colors
+  type: "dark" # Determines text/link color: "dark" for light text, "light" for dark text
+  left:
+    - text: "Usage"
+      href: articles/usage.html
+    - text: "Publications"
+      href: articles/publications.html
+    - text: "FAQ"
+      href: articles/faq.html
+    - text: "Reference"
+      href: reference/index.html
+
+# This pre-build code doesn't appear to work, unfortunately (currently doing the following manually)
+# To get the in-line citations to link properly, first render README.Rmd to html and then render the html to .md
+# pkgdown sees the .md file (only) and renders it back to index.html for the site homepage
+before_build:
+  - Rscript -e "rmarkdown::render('README.Rmd')"
+  - pandoc README.html -f html -t gfm -o README.md

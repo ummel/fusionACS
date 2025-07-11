@@ -1,0 +1,11 @@
+pandoc: '3.4'
+pkgdown: 2.1.3
+pkgdown_sha: ~
+articles:
+  faq: faq.html
+  publications: publications.html
+  usage: usage.html
+last_built: 2025-07-11T02:29Z
+urls:
+  reference: https://ummel.github.io/fusionACS/reference
+  article: https://ummel.github.io/fusionACS/articles

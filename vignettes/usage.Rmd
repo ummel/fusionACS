@@ -1,0 +1,139 @@
+---
+title: "Using the fusionACS package"
+# output:
+#   md_document:
+#     variant: gfm
+bibliography: references.bib
+link-citations: true
+---
+
+The experimental fusionACS *R* package allows users to access and analyze a "pseudo-sample" of the complete fusionACS database stored within the Yale High Performance Computing facility.
+
+The complete database is prohibitively large for public dissemination and includes some data that cannot be shared. The pseudo-sample is an approximately 5% sample of ACS respondents (households and persons) for the period 2015-2019. In addition to all variables found in the ACS, it also includes all variables fused from donor surveys -- currently limited to RECS 2020 for beta testing.
+
+Importantly, the sample includes plausible geographic identifiers – from census region down to individual census tracts – for each ACS household, obtained by sampling the underlying UrbanPop data in a way that ensures that all tracts nationwide are represented.
+
+Since the sample includes only a single fusion implicate, in addition to the other restrictions, the total amount of data released is only about 0.03% of the complete fusionACS database.
+
+While the sample data cannot be used to derive valid estimates, it *can* be used to understand the structure of the data, perform exploratory analysis, and design, refine, and test analyses. Our hope is that, eventually, it will be possible to remotely execute a valid analysis -- designed and tested locally -- using the complete fusionACS database and return the full "production" results to the user.
+
+### Package install and setup
+
+Install the latest package version from Github.
+
+``` r
+devtools::install_github("ummel/fusionACS")
+```
+Load the package.
+
+``` {r}
+library(fusionACS)
+```
+
+Download the latest fusionACS microdata psudeo-sample.
+
+``` r
+get_microdata()
+```
+
+The data is automatically downloaded to a system-specific (and project-independent) location identified by the ['rappdirs' package](https://rappdirs.r-lib.org/reference/user_data_dir.html). The path to the data files is accessible via `get_directory()`, but there is no particular reason to access it directly.
+
+### Assemble microdata
+
+You can view the data dictionary to see which surveys, year, and variables are available.
+
+``` r
+dict = dictionary()
+View(dict)
+```
+
+Use the `assemble()` function to obtain your desired subset of the pseudo-sample.
+
+#### Example 1
+
+Assemble household income (hincp), housing tenure (ten), and state of residence from the ACS, plus natural gas consumption (btung), square footage (totsqft_en), and the main space heating equipment type (equipm) from the 2020 RECS, plus pseudo-assignment of county and tract from UrbanPop. Return nationwide household data for ACS respondents in year 2019.
+
+```{r, echo = FALSE}
+# This must be set manually do allow pkgdown to operate successfully
+options(fusionACS.data_directory = "/home/kevin/.local/share/fusionACS/fusionACS_data_2025-07-07")
+```
+
+``` {r}
+my.data = assemble(
+    variables = c(hincp, ten, btung, totsqft_en, equipm, state_name, county10, tract10), 
+    year = 2019, 
+    respondent = "household"
+)
+
+head(my.data)
+```
+
+#### Example 2
+
+Same as above but for years 2017-2019 and includes optional expressions to: 1) Restrict to households in the state of Texas that used natural gas; 2) Create a new variable (btung_per_ft2) that measures consumption per square foot; and 3) Remove btung and totsqft_en after creating the new variable, for convenience.
+
+``` {r}
+my.data = assemble(
+  variables = c(hincp, ten, btung, totsqft_en, equipm, state_name, county10, tract10), 
+  year = 2017:2019, 
+  respondent = "household", 
+  btung > 0, 
+  state_name == "Texas", 
+  btung_per_ft2 = btung / totsqft_en, 
+  -c(btung, totsqft_en)
+)
+
+head(my.data)
+```
+
+### Analyze microdata
+
+Use the `analyze()` function to calculate means, medians, sums, proportions, and counts of specific variables, optionally across population subgroups. The analysis process uses the microdata sample you generated via `assemble()`.
+
+#### Example 1
+
+Calculate mean natural gas consumption per square foot. Since no `by` argument is specified, the analysis applies to all observations in `my.data`; i.e. all households in Texas in 2017-2019 that used natural gas.
+
+``` {r}
+test <- analyze(
+  data = my.data,
+  ~ mean(btung_per_ft2)
+)
+
+test
+```
+The result has a single row, because no sub-populations were requested in this example. The results include a point estimate (`est`), but this is only an approximation since it is computed using a fraction of the complete database. No margin of error (`moe`) is returned, because the pseudo-sample does not contain the multiple fusion implicates necessary to estimate uncertainty.
+
+#### Example 2
+
+Same as above but also request *median* natural gas consumption per square foot and the proportion of households using each type of heating equipment (equipm). Calculate estimates for sub-populations defined by housing tenure (ten).
+
+``` {r}
+test <- analyze(
+  data = my.data,
+  ~ mean(btung_per_ft2),
+  ~ median(btung_per_ft2),
+  ~ mean(equipm),
+  by = ten
+)
+
+test
+```
+The results suggest the typical (median) renter in Texas consumes more natural gas per square foot of living space than homeowners.
+
+``` {r}
+subset(test, rhs == "median(btung_per_ft2)", select = c(ten, est))
+```
+
+#### Example 3
+
+Mean and median natural gas consumption per square foot, calculated (separately) for population subgroups defined by: 1) housing tenure; 2) housing tenure and heating equipment; and 3) census tract. This example illustrates how flexible the `by` argument can be.
+
+``` {r}
+test <- analyze(
+  data = my.data,
+  ~ mean(btung_per_ft2),
+  ~ median(btung_per_ft2),
+  by = list(ten, c(ten, equipm), c(state_name, county10, tract10))
+)
+```

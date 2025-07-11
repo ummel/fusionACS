@@ -1,7 +1,0 @@
----
-title: "Frequently Asked Questions"
----
-
-### Can other donor surveys be fused?
-
-Yes. In principle, any U.S. household- or person-level national survey circa 2005 or later is a candidate for fusion.

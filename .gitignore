@@ -3,6 +3,7 @@
 .RData
 .Ruserdata
 .Renviron
+.Rbuildignore
 /fusionACS_data/
 /dev/
-/website/.quarto
+README.html
