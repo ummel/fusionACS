@@ -1,7 +1,6 @@
 # Specify package imports
 #' @import stringr
 #' @import dplyr
-#' @import ellmer
 #' @import arrow
 #' @import collapse
 #' @importFrom stats density df median qt setNames var

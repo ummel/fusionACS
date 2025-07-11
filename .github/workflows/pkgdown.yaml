@@ -12,6 +12,16 @@ name: pkgdown.yaml
 
 permissions: read-all
 
+reference:
+  examples: false  # Set this to false
+  # You can also set this if you want to explicitly NOT run \dontrun{} blocks
+  # run_dont_run: false
+  # If you have specific categories for your reference topics, they go here:
+  # - title: "Core Functions"
+  #   contents:
+  #     - some_function
+  #     - another_function
+
 jobs:
   pkgdown:
     runs-on: ubuntu-latest
