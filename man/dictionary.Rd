@@ -4,7 +4,7 @@
 \alias{dictionary}
 \title{Load fusionACS microdata dictionary}
 \usage{
-dictionary(directory = get_directory(), verbose = FALSE)
+dictionary(directory = get_directory(), verbose = TRUE)
 }
 \arguments{
 \item{directory}{Path to the local fusionACS data directory.}

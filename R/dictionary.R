@@ -21,7 +21,7 @@
 #' View(dict)
 #' @export
 
-dictionary <- function(directory = get_directory(), verbose = FALSE) {
+dictionary <- function(directory = get_directory(), verbose = TRUE) {
 
   p <- try(normalizePath(directory, winslash = "/", mustWork = TRUE), silent = TRUE)
   if (inherits(p, "try-error")) stop("Could not resolve the 'directory'")

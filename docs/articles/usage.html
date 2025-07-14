@@ -29,6 +29,7 @@
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
+<li class="nav-item"><a class="nav-link" href="../articles/data.html">Data</a></li>
 <li class="active nav-item"><a class="nav-link" href="../articles/usage.html">Usage</a></li>
 <li class="nav-item"><a class="nav-link" href="../articles/publications.html">Publications</a></li>
 <li class="nav-item"><a class="nav-link" href="../articles/faq.html">FAQ</a></li>
@@ -61,38 +62,6 @@
 
     
     
-<p>The experimental fusionACS <em>R</em> package allows users to access
-and analyze a “pseudo-sample” of the complete fusionACS database stored
-within the Yale High Performance Computing facility. The complete
-database – consisting of multiple fusion implicates and integration of
-the ORNL UrbanPop synthetic population – is prohibitively large for
-public dissemination and contains some data that cannot be released. The
-goal of the fusionACS package is to enable users to perform exploratory
-analysis, and design, refine, and test analyses using the full suite of
-variables available in the private database.</p>
-<p>The pseudo-sample contains a single record (observation) for each ACS
-respondent (households and persons) for the period 2015-2019. Each
-record includes actual/observed values for all variables in the ACS, as
-well as a single simulation of each variable fused from donor surveys.
-As a result, the pseudo-sample plausibly mimics how ACS respondents
-might have answered questions unique to the donor survey
-questionnaires.</p>
-<p>The sample also includes a range of plausible geographic variables –
-from census region down to individual block groups – for each ACS
-household. These are obtained by random sampling of the underlying
-UrbanPop data in such a way that all block groups nationwide are
-represented.</p>
-<p>While the sample data cannot be used to derive “final” estimates or
-the associated margin of error, it <em>can</em> be used to do just about
-everything else a user might normally do during the analysis development
-and prototyping stages. And for analyses that are not hyper-specific
-(i.e. involve a comparatively large number of observations) the
-estimates derived from the pseudo-sample will often be quite close to
-the true values computed on the full database.</p>
-<p>Our hope is that, eventually, it will be possible to remotely execute
-a valid analysis – designed and tested locally – using the complete
-fusionACS database and return the full “production” results to the
-user.</p>
 <div class="section level3">
 <h3 id="package-install-and-setup">Package install and setup<a class="anchor" aria-label="anchor" href="#package-install-and-setup"></a>
 </h3>
@@ -102,31 +71,25 @@ user.</p>
 <p>Load the package.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ummel.github.io/fusionACS">fusionACS</a></span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## <span style="color: #00BBBB;">ℹ</span> fusionACS package v0.0.1 (https://ummel.github.io/fusionACS)</span></span></code></pre>
-<pre><code><span><span class="co">## <span style="color: #BBBB00;">!</span> No microdata directory specified. See ?get_microdata</span></span></code></pre>
 <p>Download the latest fusionACS microdata psudeo-sample.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/get_microdata.html">get_microdata</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## → Extracting the downloaded .tar file</span></span></code></pre>
-<pre><code><span><span class="co">## <span style="color: #00BB00;">✔</span> Data saved to: /home/kevin/.local/share/fusionACS/fusionACS_data_2025-07-11</span></span>
-<span><span class="co">## This is now the default fusionACS data directory. See ?get_directory</span></span></code></pre>
-<pre><code><span><span class="co">## <span style="color: #00BBBB;">ℹ</span> There are 340 variables available across 8 surveys:</span></span>
-<span><span class="co">##  ACS, AHS, CEI, CPS, FAPS, GALLUP, NHTS, RECS </span></span>
-<span><span class="co">## As well as 17 geographic variables. See ?dictionary for details.</span></span></code></pre>
 <p>The data is automatically downloaded to a system-specific (and
 project-independent) location identified by the <a href="https://rappdirs.r-lib.org/reference/user_data_dir.html" class="external-link">‘rappdirs’
 package</a>. The path to the data files is accessible via
 <code><a href="../reference/get_directory.html">get_directory()</a></code>, but there is no particular reason to
 access it directly.</p>
+<p>You can view the data dictionary to see which surveys, year, and
+variables are available.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">dict</span> <span class="op">=</span> <span class="fu"><a href="../reference/dictionary.html">dictionary</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## <span style="color: #00BBBB;">ℹ</span> There are 340 variables available across 8 surveys:</span></span>
+<span><span class="co">##  ACS, AHS, CEI, CPS, FAPS, GALLUP, NHTS, RECS </span></span>
+<span><span class="co">## As well as 17 geographic variables. See ?dictionary for details.</span></span></code></pre>
 </div>
 <div class="section level3">
 <h3 id="assemble-microdata">Assemble microdata<a class="anchor" aria-label="anchor" href="#assemble-microdata"></a>
 </h3>
-<p>You can view the data dictionary to see which surveys, year, and
-variables are available.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">dict</span> <span class="op">=</span> <span class="fu"><a href="../reference/dictionary.html">dictionary</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/View.html" class="external-link">View</a></span><span class="op">(</span><span class="va">dict</span><span class="op">)</span></span></code></pre></div>
 <p>Use the <code><a href="../reference/assemble.html">assemble()</a></code> function to obtain your desired
 subset of the pseudo-sample.</p>
 <div class="section level4">
@@ -138,14 +101,17 @@ footage (totsqft_en), and the main space heating equipment type (equipm)
 from the 2020 RECS, plus pseudo-assignment of county and tract from
 UrbanPop. Return nationwide household data for ACS respondents in year
 2019.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">my.data</span> <span class="op">=</span> <span class="fu"><a href="../reference/assemble.html">assemble</a></span><span class="op">(</span></span>
 <span>    variables <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">hincp</span>, <span class="va">ten</span>, <span class="va">btung</span>, <span class="va">totsqft_en</span>, <span class="va">equipm</span>, <span class="va">state_name</span>, <span class="va">county10</span>, <span class="va">tract10</span><span class="op">)</span>, </span>
 <span>    year <span class="op">=</span> <span class="fl">2019</span>, </span>
 <span>    respondent <span class="op">=</span> <span class="st">"household"</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">my.data</span><span class="op">)</span></span></code></pre></div>
+<span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## <span style="color: #00BBBB;">ℹ</span> There are 340 variables available across 8 surveys:</span></span>
+<span><span class="co">##  ACS, AHS, CEI, CPS, FAPS, GALLUP, NHTS, RECS </span></span>
+<span><span class="co">## As well as 17 geographic variables. See ?dictionary for details.</span></span></code></pre>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">my.data</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Key: &lt;year, hid&gt;</span></span>
 <span><span class="co">##     year      hid weight  hincp</span></span>
 <span><span class="co">##    &lt;int&gt;    &lt;int&gt;  &lt;int&gt;  &lt;int&gt;</span></span>
@@ -165,12 +131,12 @@ UrbanPop. Return nationwide household data for ACS respondents in year
 <span><span class="co">## 6: Owned with mortgage or loan (include home equity loans) 72000       4000</span></span>
 <span><span class="co">##             equipm state_name county10     tract10</span></span>
 <span><span class="co">##             &lt;fctr&gt;     &lt;fctr&gt;   &lt;fctr&gt;      &lt;fctr&gt;</span></span>
-<span><span class="co">## 1:           Other    Florida    12086 12086008207</span></span>
-<span><span class="co">## 2: Central furnace    Indiana    18091 18091041500</span></span>
+<span><span class="co">## 1:           Other    Florida    12086 12086008206</span></span>
+<span><span class="co">## 2: Central furnace    Indiana    18091 18091042700</span></span>
 <span><span class="co">## 3: Central furnace      Texas    48381 48381021704</span></span>
 <span><span class="co">## 4: Central furnace New Jersey    34013 34013017302</span></span>
-<span><span class="co">## 5:           Other    Florida    12105 12105015402</span></span>
-<span><span class="co">## 6: Central furnace    Alabama    01089 01089011011</span></span></code></pre>
+<span><span class="co">## 5:           Other    Florida    12105 12105015101</span></span>
+<span><span class="co">## 6: Central furnace    Alabama    01089 01089011013</span></span></code></pre>
 </div>
 <div class="section level4">
 <h4 id="example-2">Example 2<a class="anchor" aria-label="anchor" href="#example-2"></a>
@@ -180,7 +146,7 @@ expressions to: 1) Restrict to households in the state of Texas that
 used natural gas; 2) Create a new variable (btung_per_ft2) that measures
 consumption per square foot; and 3) Remove btung and totsqft_en after
 creating the new variable, for convenience.</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">my.data</span> <span class="op">=</span> <span class="fu"><a href="../reference/assemble.html">assemble</a></span><span class="op">(</span></span>
 <span>  variables <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">hincp</span>, <span class="va">ten</span>, <span class="va">btung</span>, <span class="va">totsqft_en</span>, <span class="va">equipm</span>, <span class="va">state_name</span>, <span class="va">county10</span>, <span class="va">tract10</span><span class="op">)</span>, </span>
 <span>  year <span class="op">=</span> <span class="fl">2017</span><span class="op">:</span><span class="fl">2019</span>, </span>
@@ -189,9 +155,12 @@ creating the new variable, for convenience.</p>
 <span>  <span class="va">state_name</span> <span class="op">==</span> <span class="st">"Texas"</span>, </span>
 <span>  btung_per_ft2 <span class="op">=</span> <span class="va">btung</span> <span class="op">/</span> <span class="va">totsqft_en</span>, </span>
 <span>  <span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">btung</span>, <span class="va">totsqft_en</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">my.data</span><span class="op">)</span></span></code></pre></div>
+<span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## <span style="color: #00BBBB;">ℹ</span> There are 340 variables available across 8 surveys:</span></span>
+<span><span class="co">##  ACS, AHS, CEI, CPS, FAPS, GALLUP, NHTS, RECS </span></span>
+<span><span class="co">## As well as 17 geographic variables. See ?dictionary for details.</span></span></code></pre>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">my.data</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Key: &lt;year, hid&gt;</span></span>
 <span><span class="co">##     year      hid weight  hincp</span></span>
 <span><span class="co">##    &lt;int&gt;    &lt;int&gt;  &lt;int&gt;  &lt;int&gt;</span></span>
@@ -214,9 +183,9 @@ creating the new variable, for convenience.</p>
 <span><span class="co">## 1:      Texas    48113 48113009202     22.271845</span></span>
 <span><span class="co">## 2:      Texas    48215 48215024113     12.633333</span></span>
 <span><span class="co">## 3:      Texas    48121 48121021100     37.027027</span></span>
-<span><span class="co">## 4:      Texas    48355 48355003500     23.480392</span></span>
+<span><span class="co">## 4:      Texas    48355 48355005602     23.480392</span></span>
 <span><span class="co">## 5:      Texas    48141 48141000109     11.979866</span></span>
-<span><span class="co">## 6:      Texas    48121 48121021745      3.292453</span></span></code></pre>
+<span><span class="co">## 6:      Texas    48121 48121021738      3.292453</span></span></code></pre>
 </div>
 </div>
 <div class="section level3">

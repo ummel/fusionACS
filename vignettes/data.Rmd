@@ -1,0 +1,53 @@
+---
+title: "Current surveys and variables"
+# output:
+#   md_document:
+#     variant: gfm
+bibliography: references.bib
+link-citations: true
+---
+
+``` {r setup, include = FALSE}
+m <- try(get_microdata(), silent = TRUE)
+if (inherits(m, "try-error")) {
+  options(fusionACS.data_directory = list.dirs(rappdirs::user_data_dir(appname = "fusionACS"), recursive = FALSE)[1])
+}
+```
+
+The latest release of the fusionACS microdata pseudo-sample contains variables sourced from the following surveys:
+
+- American Community Survey (ACS), 2015-2019 [link](https://www.census.gov/programs-surveys/acs/)
+- American Housing Survey (AHS), 2019 [link](https://www.census.gov/programs-surveys/ahs.html)
+- Consumer Expenditure Survey - Interview (CEI), 2015-2019 [link](https://www.bls.gov/cex/)
+- Current Population Survey (CPS), 2015-2019 [link](https://www.census.gov/programs-surveys/cps.html)
+- National Household Food Acquisition and Purchase Survey (FAPS), 2013 [link](https://www.ers.usda.gov/data-products/foodaps-national-household-food-acquisition-and-purchase-survey)
+- Gallup U.S. (GALLUP), 2019 [link?]
+- National Household Travel Survey (NHTS), 2017 [link](https://nhts.ornl.gov/)
+- Residential Energy Consumption Survey (RECS), 2020 [link](https://www.eia.gov/consumption/residential/)
+
+The table below provides abbreviated metadata for the variables available in the latest release of the fusionACS microdata pseudo-sample.
+
+At present, only a handful of variables are fused from some of the donor surveys -- often for the specific research purposes of fusionACS team members. We hope to expand the number of variables in the future. If there are particular variables or topics of interest that you would like to see included, please let us know.
+
+---
+
+```{r, include = FALSE}
+require(dplyr)
+d <- fusionACS::dictionary(verbose = FALSE) %>% 
+  mutate(description = paste0(description, ifelse(!custom | is.na(custom), "", " [custom variable]"))) %>% 
+  select(variable, description, survey, respondent) %>% 
+  mutate_at(vars(survey, respondent), factor) %>%   # Factors are filtered via dropdown rather than text search in DT table (below)
+  rename_with(stringr::str_to_sentence) %>% 
+  distinct()
+```
+
+``` {r, echo = FALSE}
+DT::datatable(
+  data = d,
+  rownames = FALSE,
+  filter = "top",
+  options = list(scrollX = TRUE,
+                 dom = 'tipr',  # NOTE: Has been deprecated. See here: https://datatables.net/reference/option/dom
+                 searchHighlight = TRUE,
+                 pageLength = 20)
+)

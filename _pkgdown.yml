@@ -37,6 +37,8 @@ navbar:
   bg: "secondary" # Can be "dark", "light", "primary", or other Bootstrap colors
   type: "dark" # Determines text/link color: "dark" for light text, "light" for dark text
   left:
+    - text: "Data"
+      href: articles/data.html
     - text: "Usage"
       href: articles/usage.html
     - text: "Publications"

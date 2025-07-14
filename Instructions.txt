@@ -1,0 +1,34 @@
+Instructions for correctly rendering the site locally using pkgdown.
+
+1. Build the local fusionACS package and make sure the microdata is up to date.
+
+devtools::document()
+devtools::install()
+
+2. Knit README.Rmd document to html. This creates /README.html
+
+rmarkdown::render(
+  input = "README.Rmd",
+  output_format = "html_document"
+)
+
+3. Convert README.html to README.md:
+
+rmarkdown::pandoc_convert(
+  input = "README.html",
+  to = "markdown",
+  output = "README.md"
+)
+
+4. Build the whole pkgdown site. Set examples = FALSE just because they currently don't execute from within build_site().
+
+pkgdown::build_site(examples = FALSE)
+
+5. Remove README.html. It is not longer needed. Can keep README.md, because it will render on the github repo page automatically (useful information).
+
+unlink("README.html")
+
+-----
+
+NOTE: Steps 2 and 3 are necessary only because I cannot get pkgdown to render the homepage from README.Rmd directly (it wants .md). But .md format does not, apparently, support the Bibtex reference and links in my .Rmd file. So, it is necessary to render (correctly) to html, then convert the html to .md, which then allows pkgdown to see README.md and correctly re-render that file to html with the references and links intact.
+

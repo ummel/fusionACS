@@ -31,6 +31,7 @@
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
+<li class="nav-item"><a class="nav-link" href="articles/data.html">Data</a></li>
 <li class="nav-item"><a class="nav-link" href="articles/usage.html">Usage</a></li>
 <li class="nav-item"><a class="nav-link" href="articles/publications.html">Publications</a></li>
 <li class="nav-item"><a class="nav-link" href="articles/faq.html">FAQ</a></li>
@@ -50,34 +51,39 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="container-fluid main-container">
 <div id="header">
-<div class="section level1">
+<div class="section level1 title toc-ignore">
 
 </div>
 </div>
 <div class="section level3">
-<h3 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
+<h3 id="project-overview">Project overview<a class="anchor" aria-label="anchor" href="#project-overview"></a>
 </h3>
-<p>A large amount of data concerning the experiences and wellbeing of American households is collected by surveys. Household surveys typically focus on a single topic – e.g. finances, housing, health – and field independent and relatively small samples. As a result, data users are often constrained by the particular variables and spatial resolution available in a single survey.</p>
-<p>The fusionACS data science platform <span class="citation">(<a href="#ref-Ummel2024">Ummel et al. 2024</a>)</span> helps address this problem by statistically “fusing” microdata from disparate surveys to simulate a single, integrated, high-resolution survey. The resulting fused microdata can be used to perform analyses that would otherwise be impossible. At its core, fusionACS seeks to maximize the amount of useful information that can be extracted from the existing array of U.S. survey data.</p>
-<p>In 2025, an enhanced version of fusionACS was introduced that integrates UrbanPop, a synthetic population data product produced by Oak Ridge National Laboratory <span class="citation">(<a href="#ref-Tuccillo2023">Tuccillo et al. 2023</a>)</span>. UrbanPop provides probabilistic estimates of the location (block group) of each ACS respondent household. The fusionACS + UrbanPop platform is able to generate estimates for any donor survey variable for locales as small as individual census block groups.</p>
+<p>A large amount of data concerning American households is collected by surveys. Individual surveys typically focus on a single topic – e.g. finances, housing, or health – and field independent and relatively small samples. As a result, data users are constrained by the particular variables and spatial resolution available in a single survey. The fusionACS data science platform <span class="citation">(<a href="#ref-Ummel2024">Ummel et al. 2024</a>)</span> addresses this problem by statistically “fusing” variables from disparate surveys to simulate a single, integrated, high-resolution survey.</p>
+<p>Variables unique to “donor” surveys are simulated for American Community Survey (ACS) households and individuals, thereby generating probabilistic estimates of how ACS respondents might have answered a donor survey’s questionnaire. Respondent characteristics that are common to both the donor and the ACS (e.g. income, age, household size) – as well as spatial information that can be merged to both (e.g. characteristics of the local built environment) – are used as predictors variables in LightGBM machine learning models <span class="citation">(<a href="#ref-Ke2017">Ke et al. 2017</a>)</span>.</p>
+<p>In 2025, an enhanced version of fusionACS was introduced that integrates UrbanPop, a synthetic population data product produced by Oak Ridge National Laboratory <span class="citation">(<a href="#ref-Tuccillo2023">Tuccillo et al. 2023</a>)</span>. UrbanPop provides probabilistic estimates of the location of each ACS respondent household. The fusionACS + UrbanPop platform makes it possible to derive estimates at high spatial resolution – even at the level of individual census block groups – for any ACS or donor survey variable.</p>
+<p>The fusionACS project seeks to maximize the amount of useful information that can be extracted from existing U.S. household survey data in order to help academics and policymakers answer research questions that would otherwise be impossible.</p>
 </div>
 <div class="section level3">
-<h3 id="methodology">Methodology<a class="anchor" aria-label="anchor" href="#methodology"></a>
+<h3 id="how-to-access">How to access<a class="anchor" aria-label="anchor" href="#how-to-access"></a>
 </h3>
-<p>fusionACS uses the American Community Survey (ACS) – the largest U.S. household survey – as the “data backbone” of the fusion process. Variables in “donor” surveys are fused onto ACS Public Use Microdata Sample (PUMS) microdata to produce simulated values for variables unique to the donor. This generates probabilistic estimates of how ACS respondents might have answered a donor survey’s questionnaire. Respondent characteristics that are common to both the donor and the ACS (e.g. income, age, household size) – as well as spatial information that can be merged to both (e.g. characteristics of the local built environment) – are used as predictors variables in LightGBM machine learning models <span class="citation">(<a href="#ref-Ke2017">Ke et al. 2017</a>)</span>.</p>
+<p>The fusionACS <em>R</em> package allows users to access and analyze a “pseudo-sample” of the complete fusionACS database stored within the Yale High Performance Computing (HPC) facility. The complete database – consisting of multiple fusion implicates and integration of the ORNL UrbanPop synthetic population – is prohibitively large for public dissemination and contains some data that cannot be released. The goal of the fusionACS package is to enable users to perform exploratory analysis, and design, refine, and test analyses using the full suite of variables available in the private database.</p>
+<p>The pseudo-sample contains a single record (observation) for each ACS respondent (households and persons) for the period 2015-2019. Each record includes actual/observed values for all variables in the ACS, as well as a single simulation of each variable fused from donor surveys. As a result, the pseudo-sample plausibly mimics how ACS respondents might have answered questions unique to the donor survey questionnaires.</p>
+<p>The sample also includes a range of geographic variables – from census region down to individual block groups – for each ACS household. These are obtained by random sampling of the underlying UrbanPop data in such a way that all block groups nationwide are represented.</p>
+<p>While the sample data cannot be used to derive “final” estimates or the associated margin of error, it <em>can</em> be used to do just about everything else a user might normally do during the analysis development and prototyping stages. And for analyses that are not hyper-specific (i.e. involve a comparatively large number of observations) the estimates derived from the pseudo-sample will often be quite close to the true values computed on the full database.</p>
+<p>Our hope is that it will eventually be possible to remotely execute a valid analysis – designed and tested locally – using the complete fusionACS database and return the full “production” results to the user.</p>
 </div>
 <div class="section level3 unnumbered">
-<h3 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
+<h3 class="unnumbered" id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h3>
-<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0">
+<div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
 <div id="ref-Ke2017" class="csl-entry">
-Ke, Guolin, Qi Meng, Thomas Finley, Taifeng Wang, Wei Chen, Weidong Ma, Qiwei Ye, and Tie-Yan Liu. 2017. <span>“LightGBM: A Highly Efficient Gradient Boosting Decision Tree.”</span> In <em>Advances in Neural Information Processing Systems 30</em>, 3149–57. <a href="https://papers.nips.cc/paper/6907-lightgbm-a-highly-efficient-gradient-boosting-decision-tree" class="external-link uri">https://papers.nips.cc/paper/6907-lightgbm-a-highly-efficient-gradient-boosting-decision-tree</a>.
+Ke, Guolin, Qi Meng, Thomas Finley, Taifeng Wang, Wei Chen, Weidong Ma, Qiwei Ye, and Tie-Yan Liu. 2017. “LightGBM: A Highly Efficient Gradient Boosting Decision Tree.” In <em>Advances in Neural Information Processing Systems 30</em>, 3149–57. <a href="https://papers.nips.cc/paper/6907-lightgbm-a-highly-efficient-gradient-boosting-decision-tree" class="external-link uri">https://papers.nips.cc/paper/6907-lightgbm-a-highly-efficient-gradient-boosting-decision-tree</a>.
 </div>
 <div id="ref-Tuccillo2023" class="csl-entry">
-Tuccillo, Joseph V., Robert Stewart, Amy Rose, Nathan Trombley, Jessica Moehl, Nicholas Nagle, and Budhendra Bhaduri. 2023. <span>“UrbanPop: A Spatial Microsimulation Framework for Exploring Demographic Influences on Human Dynamics.”</span> <em>Applied Geography</em> 151: 102844. <a href="https://doi.org/10.1016/j.apgeog.2022.102844" class="external-link uri">https://doi.org/10.1016/j.apgeog.2022.102844</a>.
+Tuccillo, Joseph V., Robert Stewart, Amy Rose, Nathan Trombley, Jessica Moehl, Nicholas Nagle, and Budhendra Bhaduri. 2023. “UrbanPop: A Spatial Microsimulation Framework for Exploring Demographic Influences on Human Dynamics.” <em>Applied Geography</em> 151: 102844. <a href="https://doi.org/10.1016/j.apgeog.2022.102844" class="external-link uri">https://doi.org/10.1016/j.apgeog.2022.102844</a>.
 </div>
 <div id="ref-Ummel2024" class="csl-entry">
-Ummel, Kevin, Miguel Poblete-Cazenave, Karthik Akkiraju, Nick Graetz, Hero Ashman, Cora Kingdon, Steven Herrera Tenorio, Aaryaman Sunny Singhal, Daniel Aldana Cohen, and Narasimha D. Rao. 2024. <span>“Multidimensional Well-Being of US Households at a Fine Spatial Scale Using Fused Household Surveys.”</span> <em>Scientific Data</em> 11 (142). <a href="https://doi.org/10.1038/s41597-023-02788-7" class="external-link uri">https://doi.org/10.1038/s41597-023-02788-7</a>.
+Ummel, Kevin, Miguel Poblete-Cazenave, Karthik Akkiraju, Nick Graetz, Hero Ashman, Cora Kingdon, Steven Herrera Tenorio, Aaryaman Sunny Singhal, Daniel Aldana Cohen, and Narasimha D. Rao. 2024. “Multidimensional Well-Being of US Households at a Fine Spatial Scale Using Fused Household Surveys.” <em>Scientific Data</em> 11 (142). <a href="https://doi.org/10.1038/s41597-023-02788-7" class="external-link uri">https://doi.org/10.1038/s41597-023-02788-7</a>.
 </div>
 </div>
 </div>

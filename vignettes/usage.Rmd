@@ -7,15 +7,13 @@ bibliography: references.bib
 link-citations: true
 ---
 
-The experimental fusionACS *R* package allows users to access and analyze a "pseudo-sample" of the complete fusionACS database stored within the Yale High Performance Computing facility. The complete database -- consisting of multiple fusion implicates and integration of the ORNL UrbanPop synthetic population -- is prohibitively large for public dissemination and contains some data that cannot be released. The goal of the fusionACS package is to enable users to perform exploratory analysis, and design, refine, and test analyses using the full suite of variables available in the private database.
-
-The pseudo-sample contains a single record (observation) for each ACS respondent (households and persons) for the period 2015-2019. Each record includes actual/observed values for all variables in the ACS, as well as a single simulation of each variable fused from donor surveys. As a result, the pseudo-sample plausibly mimics how ACS respondents might have answered questions unique to the donor survey questionnaires.
-
-The sample also includes a range of plausible geographic variables – from census region down to individual block groups – for each ACS household. These are obtained by random sampling of the underlying UrbanPop data in such a way that all block groups nationwide are represented.
-
-While the sample data cannot be used to derive "final" estimates or the associated margin of error, it *can* be used to do just about everything else a user might normally do during the analysis development and prototyping stages. And for analyses that are not hyper-specific (i.e. involve a comparatively large number of observations) the estimates derived from the pseudo-sample will often be quite close to the true values computed on the full database.
-
-Our hope is that, eventually, it will be possible to remotely execute a valid analysis -- designed and tested locally -- using the complete fusionACS database and return the full "production" results to the user.
+``` {r setup, include = FALSE}
+library(fusionACS)
+m <- try(get_microdata(), silent = TRUE)
+if (inherits(m, "try-error")) {
+  options(fusionACS.data_directory = list.dirs(rappdirs::user_data_dir(appname = "fusionACS"), recursive = FALSE)[1])
+}
+```
 
 ### Package install and setup
 
@@ -24,44 +22,33 @@ Install the latest package version from Github.
 ``` r
 devtools::install_github("ummel/fusionACS")
 ```
+
 Load the package.
 
-```{r, echo = FALSE}
-# Set the directory to NULL so that
-try(unlink(fusionACS::get_directory(), recursive = TRUE), silent = TRUE)
-fusionACS::set_directory(NULL)
-try(devtools::unload("fusionACS"), silent = TRUE)
-```
-
-``` {r}
+``` r
 library(fusionACS)
 ```
+
 Download the latest fusionACS microdata psudeo-sample.
 
-``` {r}
+``` r
 get_microdata()
 ```
-The data is automatically downloaded to a system-specific (and project-independent) location identified by the ['rappdirs' package](https://rappdirs.r-lib.org/reference/user_data_dir.html). The path to the data files is accessible via `get_directory()`, but there is no particular reason to access it directly.
 
-### Assemble microdata
+The data is automatically downloaded to a system-specific (and project-independent) location identified by the ['rappdirs' package](https://rappdirs.r-lib.org/reference/user_data_dir.html). The path to the data files is accessible via `get_directory()`, but there is no particular reason to access it directly.
 
 You can view the data dictionary to see which surveys, year, and variables are available.
 
 ``` {r}
 dict = dictionary()
-View(dict)
 ```
+### Assemble microdata
 
 Use the `assemble()` function to obtain your desired subset of the pseudo-sample.
 
 #### Example 1
 
 Assemble household income (hincp), housing tenure (ten), and state of residence from the ACS, plus natural gas consumption (btung), square footage (totsqft_en), and the main space heating equipment type (equipm) from the 2020 RECS, plus pseudo-assignment of county and tract from UrbanPop. Return nationwide household data for ACS respondents in year 2019.
-
-```{r, echo = FALSE}
-# This must be set manually do allow pkgdown to operate successfully
-options(fusionACS.data_directory = "/home/kevin/.local/share/fusionACS/fusionACS_data_2025-07-07")
-```
 
 ``` {r}
 my.data = assemble(
