@@ -6,9 +6,9 @@
 \usage{
 assemble(
   variables,
-  year,
   respondent,
   ...,
+  year = "auto",
   directory = get_directory(),
   cores = get_cores()
 )
@@ -16,11 +16,11 @@ assemble(
 \arguments{
 \item{variables}{Vector of quoted or unquoted survey variables to return. In addition to \code{variables}, the output microdata also includes universal identifier variables (see Details).}
 
-\item{year}{Integer vector specifying the year(s) of ACS-PUMS microdata to return.}
-
 \item{respondent}{Character. Whether to return "household" or "person" microdata; i.e. the type of survey respondent. When \code{respondent = "household"}, any person-level \code{variables} return the response for the head of household (i.e. reference person). When \code{respondent = "person"}, any household-level \code{variables} are replicated for each person within a household.}
 
 \item{...}{Optional expressions passed to \link[dplyr:mutate]{mutate} to create new columns, \link[dplyr:filter]{filter} to subset rows, or \link[dplyr:select]{select} to remove variables (usually after a mutate). See Examples.}
+
+\item{year}{Either 'auto' (the default) or an integer vector specifying the year(s) of ACS-PUMS microdata to return. \code{year = "auto"} automatically sets a plausible value based on the requested \code{variables}.}
 
 \item{directory}{Character. Path to the local fusionACS data directory. This is typically created automatically by \link{get_microdata}.}
 

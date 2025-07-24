@@ -38,29 +38,30 @@ get_microdata <- function(version = "latest", overwrite = FALSE) {
   }
 
   # Download the .tar file for the latest release
-  fname <- grep("^fusionACS_data", piggyback::pb_list(repo = "ummel/fusionACS", tag = tag)$file_name, value = TRUE)
-  if (length(fname) != 1) cli_abort("Did not identify exactly one 'fusionACS_data' file to download from repository release.")
-  piggyback::pb_download(file = fname,
-                         dest = data.dir,
+  dest.dir <- file.path(data.dir, paste0("fusionACS_data_", tag))
+  unlink(dest.dir, recursive = TRUE)
+  dir.create(dest.dir, showWarnings = FALSE)
+  piggyback::pb_download(file = NULL,
+                         dest = dest.dir,
                          repo = "ummel/fusionACS",
                          tag = tag)
 
   # The directory where the files are untarred to
   # If this already exists, delete it and allow untar() to recreate below
-  dir <- sub(".tar$", "", file.path(data.dir, fname))
-  unlink(dir, recursive = TRUE)
+  # dir <- sub(".tar$", "", file.path(data.dir, fname))
+  # unlink(dir, recursive = TRUE)
 
-  # Extract the .tar file
-  # If the same data version already exists, this will simply overwrite
-  cli_alert("Extracting the downloaded .tar file\n")
-  utils::untar(tarfile = file.path(data.dir, fname), exdir = data.dir)
+  # Extract the .tar files
+  cli_alert("Extracting the downloaded .tar files\n")
+  tar.files <- list.files(dest.dir, full.names = TRUE)
+  for (x in tar.files) utils::untar(tarfile = x, exdir = dest.dir)
 
-  # Remove the original .tar file
-  unlink(file.path(data.dir, fname))
+  # Remove the original .tar files
+  unlink(tar.files)
 
   # # Update the default data path in .Rprofile and report change
-  set_directory(dir)
-  cli_alert_success(paste0("Data saved to: ", dir, "\nThis is now the default fusionACS data directory. See ?get_directory"))
+  set_directory(dest.dir)
+  cli_alert_success(paste0("Data saved to: ", dest.dir, "\nThis is now the default fusionACS data directory. See ?get_directory"))
 
   # This simply reports the dictionary summary
   dictionary(verbose = TRUE)

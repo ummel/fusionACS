@@ -25,7 +25,7 @@ dictionary <- function(directory = get_directory(), verbose = TRUE) {
 
   p <- try(normalizePath(directory, winslash = "/", mustWork = TRUE), silent = TRUE)
   if (inherits(p, "try-error")) stop("Could not resolve the 'directory'")
-  d <- read_parquet(file.path(p, "dictionary.parquet"))
+  d <- arrow::read_parquet(file.path(p, "dictionary.parquet"))
   d <- select(d, -file)  # Remove 'file' column since it isn't useful to the user
 
   # Report dictionary summary, if requested

@@ -1,7 +1,7 @@
 Package: fusionACS
 Title: Integrated, extensive, and high-resolution microdata of U.S.
     households and individuals
-Version: 0.0.1
+Version: 0.0.11
 Authors@R: c(
     person("Kevin", "Ummel", , "kevin.ummel@yale.edu", role = c("aut", "cre")),
     person("Karthik", "Akkiraju", , "karthik.akkiraju@yale.edu", role = "ctb")

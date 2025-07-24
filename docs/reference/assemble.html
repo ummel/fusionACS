@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">fusionACS</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.11</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -44,9 +44,9 @@
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">assemble</span><span class="op">(</span></span>
 <span>  <span class="va">variables</span>,</span>
-<span>  <span class="va">year</span>,</span>
 <span>  <span class="va">respondent</span>,</span>
 <span>  <span class="va">...</span>,</span>
+<span>  year <span class="op">=</span> <span class="st">"auto"</span>,</span>
 <span>  directory <span class="op">=</span> <span class="fu"><a href="get_directory.html">get_directory</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  cores <span class="op">=</span> <span class="fu"><a href="get_cores.html">get_cores</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -60,16 +60,16 @@
 <dd><p>Vector of quoted or unquoted survey variables to return. In addition to <code>variables</code>, the output microdata also includes universal identifier variables (see Details).</p></dd>
 
 
-<dt id="arg-year">year<a class="anchor" aria-label="anchor" href="#arg-year"></a></dt>
-<dd><p>Integer vector specifying the year(s) of ACS-PUMS microdata to return.</p></dd>
-
-
 <dt id="arg-respondent">respondent<a class="anchor" aria-label="anchor" href="#arg-respondent"></a></dt>
 <dd><p>Character. Whether to return "household" or "person" microdata; i.e. the type of survey respondent. When <code>respondent = "household"</code>, any person-level <code>variables</code> return the response for the head of household (i.e. reference person). When <code>respondent = "person"</code>, any household-level <code>variables</code> are replicated for each person within a household.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>Optional expressions passed to <a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a> to create new columns, <a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a> to subset rows, or <a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a> to remove variables (usually after a mutate). See Examples.</p></dd>
+
+
+<dt id="arg-year">year<a class="anchor" aria-label="anchor" href="#arg-year"></a></dt>
+<dd><p>Either 'auto' (the default) or an integer vector specifying the year(s) of ACS-PUMS microdata to return. <code>year = "auto"</code> automatically sets a plausible value based on the requested <code>variables</code>.</p></dd>
 
 
 <dt id="arg-directory">directory<a class="anchor" aria-label="anchor" href="#arg-directory"></a></dt>

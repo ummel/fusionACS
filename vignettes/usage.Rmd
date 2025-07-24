@@ -11,7 +11,7 @@ link-citations: true
 library(fusionACS)
 m <- try(get_microdata(), silent = TRUE)
 if (inherits(m, "try-error")) {
-  options(fusionACS.data_directory = list.dirs(rappdirs::user_data_dir(appname = "fusionACS"), recursive = FALSE)[1])
+  options(fusionACS.data_directory = rev(list.dirs(rappdirs::user_data_dir(appname = "fusionACS"), recursive = FALSE))[1])
 }
 ```
 
@@ -53,7 +53,6 @@ Assemble household income (hincp), housing tenure (ten), and state of residence 
 ``` {r}
 my.data = assemble(
     variables = c(hincp, ten, btung, totsqft_en, equipm, state_name, county10, tract10), 
-    year = 2019, 
     respondent = "household"
 )
 
@@ -67,7 +66,6 @@ Same as above but for years 2017-2019 and includes optional expressions to: 1) R
 ``` {r}
 my.data = assemble(
   variables = c(hincp, ten, btung, totsqft_en, equipm, state_name, county10, tract10), 
-  year = 2017:2019, 
   respondent = "household", 
   btung > 0, 
   state_name == "Texas", 

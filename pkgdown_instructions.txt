@@ -20,14 +20,13 @@ rmarkdown::pandoc_convert(
   output = "README.md"
 )
 
-4. Build the whole pkgdown site.
+4. Build the whole pkgdown site. Set examples = FALSE just because they currently don't execute from within build_site().
 
-pkgdown::build_site()
+pkgdown::build_site(examples = FALSE)
 
 5. Remove README.html. It is not longer needed. Can keep README.md, because it will render on the github repo page automatically (useful information).
 
 unlink("README.html")
-
 
 -----
 
