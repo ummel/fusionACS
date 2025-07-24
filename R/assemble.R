@@ -23,7 +23,6 @@
 #'#  plus pseudo-assignment of county and tract from UrbanPop.
 #'# Nationwide household data for ACS year 2019
 #'test <- assemble(variables = c(hincp, np, btung, totsqft_en, state_name, county10, tract10),
-#'                 year = 2019,
 #'                 respondent = "household")
 #'
 #' # Same as above but for years 2017-2019 and with optional expressions used to:
@@ -31,7 +30,6 @@
 #' # 2. Create a new variable (btung_per_ft2) measuring consumption per square foot
 #' # 3. Remove btung and totsqft_en after creating btung_per_ft2
 #'test <- assemble(variables = c(hincp, np, btung, totsqft_en, state_name, county10, tract10),
-#'                 year = 2017:2019,
 #'                 respondent = "household",
 #'                 btung > 0,
 #'                 state_name == "Texas",
@@ -48,18 +46,16 @@
 # library(collapse)
 # library(arrow)
 
-#---
-
 # # Variables I want:
 # variables <- c('state_name', 'cookfuel', 'ratinghs', 'hrfs12m1', 'gsyrgal', 'dollarel', 'hincp', 'rac1p')
-# year <- 2015:2019
+# year <- "auto"
 # respondent <- "household"
 # directory = get_directory()
 # cores = get_cores()
 # #
 # # # !And imagine we have a filter call in assemble() like:
 # fun <- function(...) separate_dots(enquos(...))
-# dots <- fun(state_name == "Oregon")
+# dots <- fun()
 
 #----
 
@@ -82,27 +78,27 @@ assemble <- function(variables,
     } %>%
       unique()  # Eliminate any duplicate entries
   }, silent = TRUE)
-  if (inherits(variables[1], "try-error") | variables[1] == "") stop("Missing or invalid 'variables' argument")
+  if (inherits(variables[1], "try-error") | variables[1] == "") cli_abort("Missing or invalid 'variables' argument")
 
   # Check the 'path' argument
   # Remove leading slash from string (normalizePath doesn't like it)
   path <- try(normalizePath(directory, winslash = "/", mustWork = TRUE), silent = TRUE)
-  if (inherits(path, "try-error")) stop("Could not resolve the 'directory' path: ", path)
+  if (inherits(path, "try-error")) cli_abort(c("Could not resolve the 'directory' path:", path))
 
   # Attempt to assemble dictionary
   dict <- try(read_parquet(file.path(path, "dictionary.parquet")), silent = TRUE)
-  if (inherits(dict, "try-error")) stop("Failed to access the database dictionary. Are you sure 'directory' is correct?\n", dict)
+  if (inherits(dict, "try-error")) cli_abort(c("Failed to access the database dictionary. Are you sure 'directory' is correct?", dict))
 
   # Check the 'year' argument
-  if (year[1] != "auto" & !all(year %in% na.omit(unique(unlist(dict$years))))) stop("Invalid 'year' argument")
+  if (year[1] != "auto" & !all(year %in% unlist(dict$years))) cli_abort("Invalid 'year' argument")
 
   # Check the 'respondent' argument
-  if (!length(respondent) == 1 | !tolower(respondent[1]) %in% c('household', 'person')) stop("Invalid 'respondent' argument")
-  rtype <- ifelse(tolower(respondent) == "household", "H", "P")
+  if (!length(respondent) == 1 | !respondent[1] %in% c('household', 'person')) cli_abort("Invalid 'respondent' argument")
+  rtype <- ifelse(respondent == "household", "H", "P")
 
   # Check and set the 'cores' argument
   max.cores <- max(parallelly::availableCores(logical = FALSE), parallelly::availableCores(logical = TRUE))
-  if (!length(cores) == 1 | !cores[1] %in% 1:max.cores) stop("Invalid 'cores' argument")
+  if (!length(cores) == 1 | !cores[1] %in% 1:max.cores) cli_abort("Invalid 'cores' argument")
   arrow::set_cpu_count(cores)
   data.table::setDTthreads(cores)
   collapse::set_collapse(nthreads = cores)
@@ -121,16 +117,25 @@ assemble <- function(variables,
   svars <- unlist(lapply(dots$select, function(x) all.vars(rlang::quo_get_expr(x))))
 
   # If there is an invalid select() expression, report with as error
-  if (length(dots$invalid)) stop("Invalid select() expressions in `...`. Only negations (-) are allowed:\n", paste(dots$invalid, collapse = "\n"))
+  if (length(dots$invalid)) {
+    cli_abort(c("Invalid select() expressions in `...`. Only negations (-) are allowed:",
+                paste(dots$invalid, collapse = "\n")))
+  }
 
   # Check for circular mutate() expressions
-  if (length(mvars) & all(mvars %in% names(mvars))) stop("It looks like the mutate() calls in `...` are circular.")
+  if (length(mvars) & all(mvars %in% names(mvars))) {
+    cli_abort("It looks like the mutate() calls in `...` are circular.")
+  }
 
   # Check if the mutate(), filter(), and select() variables are present in 'variables'
   # The ... expressions can reference universal variables or 'weight' without explicit inclusion in 'variables' argument
   evars <- unique(setdiff(c(mvars, fvars, svars), names(dots$mutate)))
   emiss <- setdiff(evars, c(variables, uvar, 'weight'))
-  if (length(emiss)) stop("The following variable(s) are needed by expressions in `...` but are not included in the 'variables' argument:\n", paste(emiss, collapse = "\n"), "\nFor safety and clarity, you must explicitly include these in the 'variables' argument.")
+  if (length(emiss)) {
+    cli_abort(c("The following variable(s) are needed by expressions in `...` but are not included in the 'variables' argument:",
+                paste(emiss, collapse = "\n"),
+                "For safety and clarity, you must explicitly include these in the 'variables' argument."))
+  }
 
   # If no select() expressions, return all variables in result data frame
   if (length(dots$select) == 0) dots$select <- list(expr(everything()))
@@ -140,7 +145,10 @@ assemble <- function(variables,
   # TO DO: FIX FOR explicit selector!!!
   # Check that the 'variables' are present in the dictionary/database
   vmiss <- setdiff(variables, dict$variable)
-  if (length(vmiss)) stop("The following variable(s) are not in the database dictionary:\n", paste(vmiss, collapse = "\n"))
+  if (length(vmiss)) {
+    cli_abort(c("The following variable(s) are not in the database dictionary:",
+                paste(vmiss, collapse = "\n")))
+  }
 
   # Determine if UrbanPop weights should be used (use.up = TRUE)
   gn <- names(open_dataset(file.path(path, "geography.parquet")))
@@ -182,13 +190,15 @@ assemble <- function(variables,
     filter(lengths(year_miss) > 0)
   if (nrow(ymiss) > 0) {
     ymiss <- paste(paste0(ymiss$variable, " (", sapply(ymiss$year_miss, paste, collapse = ", "), ")"), collapse = "\n")
-    stop("The following variable(s) are not available for some of the requested years:\n", paste(ymiss, collapse = "\n"))
+    cli_abort(c("The following variable(s) are not available for some of the requested years:",
+                paste(ymiss, collapse = "\n")))
   }
 
   #---
 
   # Which surveys do the requested variables come from?
   dv <- dict %>%
+    filter(!(variable == "puma10" & respondent != !!respondent)) %>%  # Special handling of 'puma10', so that only the appropriate ACS entry is retained
     mutate(selector = paste0("`", survey, ifelse(is.na(vintage), "", paste0("_", vintage)), ":", variable, "`"),
            include = selector %in% variables) %>%
     filter(variable %in% variables | include) %>%
@@ -344,25 +354,22 @@ assemble <- function(variables,
     # Safety check
     stopifnot(!anyDuplicated(loc))
 
-  }
+    # Small efficiency improvement by inserting semi_join() within Apache to restrict the data coming from disk to those
+    # observations that can actually me merged to 'out'; usually merged on year-hid; puma10 in case of ACS weights
+    if (geo.filter) {
 
-  #---
+      # Unique combinations of variables in 'out' to retain based on geographic variable(s) requested
+      fdata <- loc %>%
+        select(all_of(if (use.up) c('year', 'hid') else 'puma10')) %>%
+        distinct()
 
-  # Small efficiency improvement by inserting semi_join() within Apache to restrict the data coming from disk to those
-  # observations that can actually me merged to 'out'; usually merged on year-hid; puma10 in case of ACS weights
-  if (geo.filter) {
+      # Have arrow queries restrict to year-hid returned by geographic filtering
+      dlist <- lapply(dlist, function(d) {
+        jvars <- intersect(names(d), names(fdata))
+        if (length(jvars)) semi_join(x = d, y = fdata, by = jvars) else d
+      })
 
-    # Unique combinations of variables in 'out' to retain based on geographic variable(s) requested
-    fdata <- loc %>%
-      select(all_of(if (use.up) c('year', 'hid') else 'puma10')) %>%
-      distinct()
-
-    # Have arrow queries restrict to year-hid returned by geographic filtering
-    dlist <- lapply(dlist, function(d) {
-      jvars <- intersect(names(d), names(fdata))
-      if (length(jvars)) semi_join(x = d, y = fdata, by = jvars) else d
-    })
-
+    }
   }
 
   #---

@@ -44,7 +44,6 @@ Assemble a fusionACS microdata pseudo-sample, given a user's requested variable(
 #  plus pseudo-assignment of county and tract from UrbanPop.
 # Nationwide household data for ACS year 2019
 test <- assemble(variables = c(hincp, np, btung, totsqft_en, state_name, county10, tract10),
-                year = 2019,
                 respondent = "household")
 
 # Same as above but for years 2017-2019 and with optional expressions used to:
@@ -52,7 +51,6 @@ test <- assemble(variables = c(hincp, np, btung, totsqft_en, state_name, county1
 # 2. Create a new variable (btung_per_ft2) measuring consumption per square foot
 # 3. Remove btung and totsqft_en after creating btung_per_ft2
 test <- assemble(variables = c(hincp, np, btung, totsqft_en, state_name, county10, tract10),
-                year = 2017:2019,
                 respondent = "household",
                 btung > 0,
                 state_name == "Texas",
