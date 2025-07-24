@@ -10,7 +10,8 @@ assemble(
   ...,
   year = "auto",
   directory = get_directory(),
-  cores = get_cores()
+  cores = get_cores(),
+  force_up = FALSE
 )
 }
 \arguments{

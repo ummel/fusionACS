@@ -46,6 +46,11 @@
 # library(collapse)
 # library(arrow)
 
+# variables = c('agep', 'wkhp', 'puma10')
+# respondent = "person"
+# year = 2015:2019
+# force_up = TRUE
+
 # # Variables I want:
 # variables <- c('state_name', 'cookfuel', 'ratinghs', 'hrfs12m1', 'gsyrgal', 'dollarel', 'hincp', 'rac1p')
 # year <- "auto"
@@ -64,7 +69,8 @@ assemble <- function(variables,
                      ...,
                      year = "auto",
                      directory = get_directory(),
-                     cores = get_cores()
+                     cores = get_cores(),
+                     force_up = FALSE
 ) {
 
   # Check and construct the 'variables' argument
@@ -153,7 +159,7 @@ assemble <- function(variables,
   # Determine if UrbanPop weights should be used (use.up = TRUE)
   gn <- names(open_dataset(file.path(path, "geography.parquet")))
   up.gvars <- setdiff(gn, c('region', 'division', 'state', 'state_postal', 'state_name', 'puma10'))  # The geographic variables listed here can utilize native ACS weights
-  use.up <- any(variables %in% up.gvars)
+  use.up <- any(variables %in% up.gvars) | force_up
 
   # Report which weights are being used
   cli::cli_alert(paste0("Returning ", ifelse(use.up, "UrbanPop ", "ACS "), respondent, "-level weights"))
@@ -299,78 +305,78 @@ assemble <- function(variables,
   # Process any geography...
   # This produces the 'loc' table
 
-  if (use.geo) {
+  #if (use.geo) {
 
-    g <- open_dataset(file.path(path, "geography.parquet"))
-    fok <- sapply(dots$filter, function(x) all(all.vars(x) %in% names(g)))
-    geo.filter <- any(fok)
-    if (geo.filter) {
-      g <- filter(g, !!!dots$filter[fok])
-      dots$filter[fok] <- NULL  # Remove the dots filters entry after being added
-    }
-
-    # Aggregate 'gfactor', if using UrbanPop weights
-    if (use.up) {
-      g <- g %>%
-        select(bg10, gfactor, any_of(variables)) %>%
-        collect()
-      gvars <- setdiff(names(g), 'gfactor')
-      g <- g %>%
-        fgroup_by(gvars) %>%
-        fsum()
-    } else {
-      # If using ACS, simply return 'puma10' and any other geographic variables
-      g <- g %>%
-        select(puma10, any_of(variables)) %>%
-        distinct() %>%
-        collect()
-    }
-
-    # Safety check
-    stopifnot(!anyDuplicated(g))
-
-    # If using UrbanPop weights...
-    if (use.up) {
-
-      # Now location and UrbanPop weights
-      loc <- open_dataset(file.path(path, "location.parquet")) %>%
-        filter(year %in% !!year) %>%
-        filter(bg10 %in% g$bg10) %>%
-        inner_join(g, by = "bg10") %>%
-        collect()
-
-      # Aggregate 'weight'
-      gvars <- intersect(names(loc), c(uvar, variables))
-      loc <- loc %>%
-        fmutate(weight = weight * gfactor * 5) %>%  # NOTE: Multiple by 5 to coerce UrbanPop weights to same overall magnitude as 5 years of ACS native weights
-        get_vars(c(gvars, 'weight')) %>%
-        fgroup_by(gvars) %>%
-        fsum()
-
-    } else {
-      loc <- g
-    }
-
-    # Safety check
-    stopifnot(!anyDuplicated(loc))
-
-    # Small efficiency improvement by inserting semi_join() within Apache to restrict the data coming from disk to those
-    # observations that can actually me merged to 'out'; usually merged on year-hid; puma10 in case of ACS weights
-    if (geo.filter) {
-
-      # Unique combinations of variables in 'out' to retain based on geographic variable(s) requested
-      fdata <- loc %>%
-        select(all_of(if (use.up) c('year', 'hid') else 'puma10')) %>%
-        distinct()
-
-      # Have arrow queries restrict to year-hid returned by geographic filtering
-      dlist <- lapply(dlist, function(d) {
-        jvars <- intersect(names(d), names(fdata))
-        if (length(jvars)) semi_join(x = d, y = fdata, by = jvars) else d
-      })
-
-    }
+  g <- open_dataset(file.path(path, "geography.parquet"))
+  fok <- sapply(dots$filter, function(x) all(all.vars(x) %in% names(g)))
+  geo.filter <- any(fok)
+  if (geo.filter) {
+    g <- filter(g, !!!dots$filter[fok])
+    dots$filter[fok] <- NULL  # Remove the dots filters entry after being added
   }
+
+  # Aggregate 'gfactor', if using UrbanPop weights
+  if (use.up) {
+    g <- g %>%
+      select(bg10, gfactor, any_of(variables)) %>%
+      collect()
+    gvars <- setdiff(names(g), 'gfactor')
+    g <- g %>%
+      fgroup_by(gvars) %>%
+      fsum()
+  } else {
+    # If using ACS, simply return 'puma10' and any other geographic variables
+    g <- g %>%
+      select(puma10, any_of(variables)) %>%
+      distinct() %>%
+      collect()
+  }
+
+  # Safety check
+  stopifnot(!anyDuplicated(g))
+
+  # If using UrbanPop weights...
+  if (use.up) {
+
+    # Now location and UrbanPop weights
+    loc <- open_dataset(file.path(path, "location.parquet")) %>%
+      filter(year %in% !!year) %>%
+      filter(bg10 %in% g$bg10) %>%
+      inner_join(g, by = "bg10") %>%
+      collect()
+
+    # Aggregate 'weight'
+    gvars <- intersect(names(loc), c(uvar, variables))
+    loc <- loc %>%
+      fmutate(weight = weight * gfactor * 5) %>%  # NOTE: Multiply by 5 to coerce UrbanPop weights to same overall magnitude as 5 years of PUMS native weights
+      get_vars(c(gvars, 'weight')) %>%
+      fgroup_by(gvars) %>%
+      fsum()
+
+  } else {
+    loc <- g
+  }
+
+  # Safety check
+  stopifnot(!anyDuplicated(loc))
+
+  # Small efficiency improvement by inserting semi_join() within arrow to restrict the data loaded from disk to those
+  # observations that can actually me merged to 'out'. Usually merged on year-hid; puma10 in case of PUMS weights.
+  if (geo.filter) {
+
+    # Unique combinations of variables in 'out' to retain based on geographic variable(s) requested
+    fdata <- loc %>%
+      select(all_of(if (use.up) c('year', 'hid') else 'puma10')) %>%
+      distinct()
+
+    # Have arrow queries restrict to year-hid returned by geographic filtering
+    dlist <- lapply(dlist, function(d) {
+      jvars <- intersect(names(d), names(fdata))
+      if (length(jvars)) semi_join(x = d, y = fdata, by = jvars) else d
+    })
+  }
+
+  #}
 
   #---
 
@@ -416,11 +422,11 @@ assemble <- function(variables,
   #rm(year.hid)
 
   # Merge/expand 'out' to include variables and weights from 'loc'
-  if (use.geo) {
-    setkey(out, NULL)
-    out <- merge(out, loc, allow.cartesian = TRUE)
-    rm(loc)
-  }
+  #if (use.geo) {
+  setkey(out, NULL)
+  out <- merge(out, loc, allow.cartesian = TRUE)
+  rm(loc)
+  #}
 
   #----
 
