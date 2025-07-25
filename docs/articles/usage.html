@@ -31,6 +31,7 @@
       <ul class="navbar-nav me-auto">
 <li class="nav-item"><a class="nav-link" href="../articles/data.html">Data</a></li>
 <li class="active nav-item"><a class="nav-link" href="../articles/usage.html">Usage</a></li>
+<li class="nav-item"><a class="nav-link" href="../articles/methods.html">Methods</a></li>
 <li class="nav-item"><a class="nav-link" href="../articles/publications.html">Publications</a></li>
 <li class="nav-item"><a class="nav-link" href="../articles/faq.html">FAQ</a></li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
@@ -242,10 +243,10 @@ observations in <code>my.data</code>; i.e. all households in Texas in
 <span><span class="co">## <span style="color: #BCBCBC;">1</span> mean_btung_per_ft2 mean(btung_per_ft2) mean  <span style="color: #BB0000;">NA</span>    <span style="text-decoration: underline;">76</span>223  20.3 0.088<span style="text-decoration: underline;">2</span></span></span></code></pre>
 <p>The result has a single row, because no sub-populations were
 requested in this example. The results include a point estimate
-(<code>est</code>), but this is only an approximation since it is
-computed using a fraction of the complete database. No margin of error
-(<code>moe</code>) is returned, because the pseudo-sample lacks the
-multiple fusion implicates needed to properly estimate uncertainty.</p>
+(<code>est</code>) and margin of error (<code>moe</code>), but these are
+only approximations because the pseudo-sample lacks the multiple fusion
+implicates and complete UrbanPop data needed for production-level
+results.</p>
 </div>
 <div class="section level4">
 <h4 id="example-2-1">Example 2<a class="anchor" aria-label="anchor" href="#example-2-1"></a>

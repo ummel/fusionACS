@@ -17,6 +17,7 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../articles/data.html">Data</a></li>
 <li class="nav-item"><a class="nav-link" href="../articles/usage.html">Usage</a></li>
+<li class="nav-item"><a class="nav-link" href="../articles/methods.html">Methods</a></li>
 <li class="nav-item"><a class="nav-link" href="../articles/publications.html">Publications</a></li>
 <li class="nav-item"><a class="nav-link" href="../articles/faq.html">FAQ</a></li>
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
@@ -48,7 +49,8 @@
 <span>  <span class="va">...</span>,</span>
 <span>  year <span class="op">=</span> <span class="st">"auto"</span>,</span>
 <span>  directory <span class="op">=</span> <span class="fu"><a href="get_directory.html">get_directory</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>  cores <span class="op">=</span> <span class="fu"><a href="get_cores.html">get_cores</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  cores <span class="op">=</span> <span class="fu"><a href="get_cores.html">get_cores</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  force_up <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -104,7 +106,6 @@
 <span><span class="co">#  plus pseudo-assignment of county and tract from UrbanPop.</span></span>
 <span><span class="co"># Nationwide household data for ACS year 2019</span></span>
 <span><span class="va">test</span> <span class="op">&lt;-</span> <span class="fu">assemble</span><span class="op">(</span>variables <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">hincp</span>, <span class="va">np</span>, <span class="va">btung</span>, <span class="va">totsqft_en</span>, <span class="va">state_name</span>, <span class="va">county10</span>, <span class="va">tract10</span><span class="op">)</span>,</span>
-<span>                year <span class="op">=</span> <span class="fl">2019</span>,</span>
 <span>                respondent <span class="op">=</span> <span class="st">"household"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Same as above but for years 2017-2019 and with optional expressions used to:</span></span>
@@ -112,7 +113,6 @@
 <span><span class="co"># 2. Create a new variable (btung_per_ft2) measuring consumption per square foot</span></span>
 <span><span class="co"># 3. Remove btung and totsqft_en after creating btung_per_ft2</span></span>
 <span><span class="va">test</span> <span class="op">&lt;-</span> <span class="fu">assemble</span><span class="op">(</span>variables <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">hincp</span>, <span class="va">np</span>, <span class="va">btung</span>, <span class="va">totsqft_en</span>, <span class="va">state_name</span>, <span class="va">county10</span>, <span class="va">tract10</span><span class="op">)</span>,</span>
-<span>                year <span class="op">=</span> <span class="fl">2017</span><span class="op">:</span><span class="fl">2019</span>,</span>
 <span>                respondent <span class="op">=</span> <span class="st">"household"</span>,</span>
 <span>                <span class="va">btung</span> <span class="op">&gt;</span> <span class="fl">0</span>,</span>
 <span>                <span class="va">state_name</span> <span class="op">==</span> <span class="st">"Texas"</span>,</span>

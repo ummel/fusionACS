@@ -62,14 +62,15 @@ As a result, the pseudo-sample plausibly mimics how ACS respondents
 might have answered questions unique to the donor survey questionnaires.
 
 The sample also includes a range of geographic variables -- from census
-region down to individual block groups -- for each ACS household. These
+region down to individual block groups -- for each ACS household.
+Geographic variables smaller than Public Use Microdata Areas (PUMA's)
 are obtained by random sampling of the underlying UrbanPop data in such
 a way that all block groups nationwide are represented.
 
-While the sample data cannot be used to derive "final" estimates or the
-associated margin of error, it *can* be used to do just about everything
-else a user might normally do during the analysis development and
-prototyping stages. And for analyses that are not hyper-specific
+While the sample data cannot be used to derive "final"
+production-quality estimates, it *can* be used to do just about
+everything else a user might normally do during the analysis development
+and prototyping stages. And for analyses that are not hyper-specific
 (i.e. involve a comparatively large number of observations) the
 estimates derived from the pseudo-sample will often be quite close to
 the true values computed on the full database.

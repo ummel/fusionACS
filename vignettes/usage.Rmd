@@ -93,7 +93,7 @@ test <- analyze(
 test
 ```
 
-The result has a single row, because no sub-populations were requested in this example. The results include a point estimate (`est`), but this is only an approximation since it is computed using a fraction of the complete database. No margin of error (`moe`) is returned, because the pseudo-sample lacks the multiple fusion implicates needed to properly estimate uncertainty.
+The result has a single row, because no sub-populations were requested in this example. The results include a point estimate (`est`) and margin of error (`moe`), but these are only approximations because the pseudo-sample lacks the multiple fusion implicates and complete UrbanPop data needed for production-level results.
 
 #### Example 2
 

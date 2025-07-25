@@ -33,6 +33,7 @@
       <ul class="navbar-nav me-auto">
 <li class="nav-item"><a class="nav-link" href="articles/data.html">Data</a></li>
 <li class="nav-item"><a class="nav-link" href="articles/usage.html">Usage</a></li>
+<li class="nav-item"><a class="nav-link" href="articles/methods.html">Methods</a></li>
 <li class="nav-item"><a class="nav-link" href="articles/publications.html">Publications</a></li>
 <li class="nav-item"><a class="nav-link" href="articles/faq.html">FAQ</a></li>
 <li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
@@ -68,8 +69,8 @@
 </h3>
 <p>The fusionACS <em>R</em> package allows users to access and analyze a “pseudo-sample” of the complete fusionACS database stored within the Yale High Performance Computing (HPC) facility. The complete database – consisting of multiple fusion implicates and integration of the ORNL UrbanPop synthetic population – is prohibitively large for public dissemination and contains some data that cannot be released. The goal of the fusionACS package is to enable users to perform exploratory analysis, and design, refine, and test analyses using the full suite of variables available in the private database.</p>
 <p>The pseudo-sample contains a single record (observation) for each ACS respondent (households and persons) for the period 2015-2019. Each record includes actual/observed values for all variables in the ACS, as well as a single simulation of each variable fused from donor surveys. As a result, the pseudo-sample plausibly mimics how ACS respondents might have answered questions unique to the donor survey questionnaires.</p>
-<p>The sample also includes a range of geographic variables – from census region down to individual block groups – for each ACS household. These are obtained by random sampling of the underlying UrbanPop data in such a way that all block groups nationwide are represented.</p>
-<p>While the sample data cannot be used to derive “final” estimates or the associated margin of error, it <em>can</em> be used to do just about everything else a user might normally do during the analysis development and prototyping stages. And for analyses that are not hyper-specific (i.e. involve a comparatively large number of observations) the estimates derived from the pseudo-sample will often be quite close to the true values computed on the full database.</p>
+<p>The sample also includes a range of geographic variables – from census region down to individual block groups – for each ACS household. Geographic variables smaller than Public Use Microdata Areas (PUMA’s) are obtained by random sampling of the underlying UrbanPop data in such a way that all block groups nationwide are represented.</p>
+<p>While the sample data cannot be used to derive “final” production-quality estimates, it <em>can</em> be used to do just about everything else a user might normally do during the analysis development and prototyping stages. And for analyses that are not hyper-specific (i.e. involve a comparatively large number of observations) the estimates derived from the pseudo-sample will often be quite close to the true values computed on the full database.</p>
 <p>Our hope is that it will eventually be possible to remotely execute a valid analysis – designed and tested locally – using the complete fusionACS database and return the full “production” results to the user.</p>
 </div>
 <div class="section level3 unnumbered">

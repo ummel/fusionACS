@@ -41,6 +41,8 @@ navbar:
       href: articles/data.html
     - text: "Usage"
       href: articles/usage.html
+    - text: "Methods"
+      href: articles/methods.html
     - text: "Publications"
       href: articles/publications.html
     - text: "FAQ"
