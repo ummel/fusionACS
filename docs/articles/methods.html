@@ -153,7 +153,7 @@ point estimate,
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mover><mi>θ</mi><mo accent="true">‾</mo></mover><annotation encoding="application/x-tex">\bar{\theta}</annotation></semantics></math>,
 is the mean of the individual estimates calculated for each of the
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>M</mi><annotation encoding="application/x-tex">M</annotation></semantics></math>
-samples:</p>
+implicates:</p>
 <p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover><mi>θ</mi><mo accent="true">‾</mo></mover><mo>=</mo><mfrac><mn>1</mn><mi>M</mi></mfrac><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>M</mi></munderover><msub><mover><mi>θ</mi><mo accent="true">̂</mo></mover><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">
 \bar{\theta} = \frac{1}{M} \sum_{i=1}^{M} \hat{\theta}_i
 </annotation></semantics></math> The variance of
@@ -258,7 +258,8 @@ radix-based ordering of the input to efficiently compute the median,
 and
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Q</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>p</mi><mn>2</mn></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">Q(p_2)</annotation></semantics></math>.
 This allows the standard error to be estimated at little additional cost
-beyond computation of the median itself. If
+beyond computation of the median itself.</p>
+<p>If
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>m</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">f(m)</annotation></semantics></math>
 is undefined, the code falls back to the conservative approximation of
 <span class="citation">Tukey (<a href="#ref-Tukey1977">1977</a>)</span>:</p>
@@ -304,10 +305,10 @@ and its component variances, the degrees of freedom is calculated using
 the formula of <span class="citation">Barnard and Rubin (<a href="#ref-Barnard1999">1999</a>)</span>. Compared to the original <span class="citation">Rubin (<a href="#ref-Rubin1987">1987</a>)</span>
 degrees of freedom, this formulation allows for unequal within-sample
 variances and is more accurate for small samples.</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ν</mi><mo>=</mo><mrow><mo stretchy="true" form="prefix">(</mo><mi>k</mi><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><msup><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>+</mo><mfrac><mrow><mfrac><mn>1</mn><mi>k</mi></mfrac><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>k</mi></munderover><mtext mathvariant="normal">Var</mtext><mrow><mo stretchy="true" form="prefix">(</mo><msub><mover><mi>θ</mi><mo accent="true">̂</mo></mover><mi>i</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow><msub><mtext mathvariant="normal">Var</mtext><mtext mathvariant="normal">between</mtext></msub></mfrac><mo stretchy="true" form="postfix">)</mo></mrow><mn>2</mn></msup><mi minsize="2.4" maxsize="2.4">/</mi><mrow><mo stretchy="true" form="prefix">(</mo><mfrac><mn>1</mn><mrow><mi>k</mi><mo>−</mo><mn>1</mn></mrow></mfrac><mo>+</mo><mfrac><mn>1</mn><msup><mi>k</mi><mn>2</mn></msup></mfrac><mo>⋅</mo><mfrac><mrow><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>k</mi></munderover><mtext mathvariant="normal">Var</mtext><msup><mrow><mo stretchy="true" form="prefix">(</mo><msub><mover><mi>θ</mi><mo accent="true">̂</mo></mover><mi>i</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mn>2</mn></msup></mrow><msubsup><mtext mathvariant="normal">Var</mtext><mtext mathvariant="normal">between</mtext><mn>2</mn></msubsup></mfrac><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">
-\nu = (k - 1) \left( 1 + \frac{ \frac{1}{k} \sum_{i=1}^{k} \text{Var}(\hat{\theta}_i) }{ \text{Var}_{\text{between}} } \right)^2
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ν</mi><mo>=</mo><mrow><mo stretchy="true" form="prefix">(</mo><mi>M</mi><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><msup><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>+</mo><mfrac><mrow><mfrac><mn>1</mn><mi>M</mi></mfrac><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>M</mi></munderover><mtext mathvariant="normal">Var</mtext><mrow><mo stretchy="true" form="prefix">(</mo><msub><mover><mi>θ</mi><mo accent="true">̂</mo></mover><mi>i</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow><msub><mtext mathvariant="normal">Var</mtext><mtext mathvariant="normal">between</mtext></msub></mfrac><mo stretchy="true" form="postfix">)</mo></mrow><mn>2</mn></msup><mi minsize="2.4" maxsize="2.4">/</mi><mrow><mo stretchy="true" form="prefix">(</mo><mfrac><mn>1</mn><mrow><mi>M</mi><mo>−</mo><mn>1</mn></mrow></mfrac><mo>+</mo><mfrac><mn>1</mn><msup><mi>M</mi><mn>2</mn></msup></mfrac><mo>⋅</mo><mfrac><mrow><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>M</mi></munderover><mtext mathvariant="normal">Var</mtext><msup><mrow><mo stretchy="true" form="prefix">(</mo><msub><mover><mi>θ</mi><mo accent="true">̂</mo></mover><mi>i</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mn>2</mn></msup></mrow><msubsup><mtext mathvariant="normal">Var</mtext><mtext mathvariant="normal">between</mtext><mn>2</mn></msubsup></mfrac><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">
+\nu = (M - 1) \left( 1 + \frac{ \frac{1}{M} \sum_{i=1}^{M} \text{Var}(\hat{\theta}_i) }{ \text{Var}_{\text{between}} } \right)^2
 \bigg/
-\left( \frac{1}{k - 1} + \frac{1}{k^2} \cdot \frac{ \sum_{i=1}^{k} \text{Var}(\hat{\theta}_i)^2 }{ \text{Var}_{\text{between}}^2 } \right)
+\left( \frac{1}{M - 1} + \frac{1}{M^2} \cdot \frac{ \sum_{i=1}^{M} \text{Var}(\hat{\theta}_i)^2 }{ \text{Var}_{\text{between}}^2 } \right)
 </annotation></semantics></math></p>
 <p>In keeping with the convention used by the U.S. Census Bureau for
 published ACS estimates, fusionACS returns the 90% margin of error:</p>

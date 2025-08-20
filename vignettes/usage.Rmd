@@ -17,7 +17,7 @@ if (inherits(m, "try-error")) {
 
 ### Package install and setup
 
-Install the latest package version from Github.
+Install the latest package version from Github. Dependencies include the [arrow](https://arrow.apache.org/docs/r/) package to allow for fast, platform- and language-independent data access. The install may take a few minutes.
 
 ``` r
 devtools::install_github("ummel/fusionACS")
@@ -48,20 +48,24 @@ Use the `assemble()` function to obtain your desired subset of the pseudo-sample
 
 #### Example 1
 
-Assemble household income (hincp), housing tenure (ten), and state of residence from the ACS, plus natural gas consumption (btung), square footage (totsqft_en), and the main space heating equipment type (equipm) from the 2020 RECS, plus pseudo-assignment of county and tract from UrbanPop. Return nationwide household data for ACS respondents in year 2019.
+Assemble household income (hincp), housing tenure (ten), and state of residence from the ACS, plus natural gas consumption (btung), square footage (totsqft_en), and the main space heating equipment type (equipm) from the 2020 RECS, plus pseudo-assignment of county and tract (2010 geographic definitions). Return nationwide household microdata.
 
 ``` {r}
 my.data = assemble(
-    variables = c(hincp, ten, btung, totsqft_en, equipm, state_name, county10, tract10), 
-    respondent = "household"
+  variables = c(hincp, ten, btung, totsqft_en, equipm, state_name, county10, tract10), 
+  respondent = "household"
 )
+```
 
+Because we requested county and tract (which require UrbanPop weights), `assemble()` automatically returned microdata observations for 2015-2019; the whole period is required to use the UrbanPop weights. Also note that the variables `btung`, `equipm`, and `totsqft_en` are present in both the 2015 and 2020 RECS fusion output. `assemble()` automatically selected the 2020 vintage (which we want), but it is also possible to manually specify the desired donor survey for a variable.
+
+``` {r}
 head(my.data)
 ```
 
 #### Example 2
 
-Same as above but for years 2017-2019 and includes optional expressions to: 1) Restrict to households in the state of Texas that used natural gas; 2) Create a new variable (btung_per_ft2) that measures consumption per square foot; and 3) Remove btung and totsqft_en after creating the new variable, for convenience.
+Same as above but includes optional expressions to: 1) Restrict to households in the state of Texas that used natural gas; 2) Create a new variable (btung_per_ft2) that measures consumption per square foot; and 3) Remove btung and totsqft_en after creating the new variable, for convenience.
 
 ``` {r}
 my.data = assemble(
@@ -82,7 +86,7 @@ Use the `analyze()` function to calculate means, medians, sums, proportions, and
 
 #### Example 1
 
-Calculate mean natural gas consumption per square foot. Since no `by` argument is specified, the analysis applies to all observations in `my.data`; i.e. all households in Texas in 2017-2019 that used natural gas.
+Calculate mean natural gas consumption per square foot. Since no `by` argument is specified, the analysis applies to all observations in `my.data`; i.e. all households in Texas in 2015-2019 that used natural gas.
 
 ``` {r}
 test <- analyze(
@@ -97,7 +101,28 @@ The result has a single row, because no sub-populations were requested in this e
 
 #### Example 2
 
-Same as above but also request *median* natural gas consumption per square foot and the proportion of households using each type of heating equipment (equipm). Calculate estimates for sub-populations defined by housing tenure (ten).
+Same as above but also request *median* natural gas consumption per square foot and the proportion of households using each type of heating equipment (equipm). We will calculate separate estimates for homeowners and renters.
+
+The ACS `ten` (housing tenure) variable contains the following levels:
+
+``` {r}
+unique(my.data$ten)
+```
+Let's add a custom housing tenure variable to `my.data` that collapses `ten` into just two categories: "Renters" and "Homeowners". There are many ways to code this, but here's a clear syntax:
+
+``` {r}
+my.data <- dplyr::mutate(
+  .data = my.data,
+  rent_own = dplyr::case_when(
+    ten %in% c('Occupied without payment of rent', 'Rented') ~ 'Renters',
+    ten %in% c('Owned free and clear', 'Owned with mortgage or loan (include home equity loans)') ~ 'Homeowners'
+  )
+)
+```
+
+Alternatively, we could create `rent_own` within the original `assemble()` call, analogous to how we created `btung_per_ft2`. Or we could take the code above, put it in a function, and pass that function to the custom `fun` argument in `analyze`. All of these are valid ways to manipulate the microdata prior to analysis.
+
+Now we calculate our desired estimates:
 
 ``` {r}
 test <- analyze(
@@ -105,26 +130,31 @@ test <- analyze(
   ~ mean(btung_per_ft2),
   ~ median(btung_per_ft2),
   ~ mean(equipm),
-  by = ten
+  by = rent_own
 )
-
-test
 ```
 The results suggest the typical (median) renter in Texas consumes more natural gas per square foot of living space than homeowners.
 
 ``` {r}
-subset(test, rhs == "median(btung_per_ft2)", select = c(ten, est))
+subset(test, rhs == "median(btung_per_ft2)", select = c(rent_own, est))
 ```
 
 #### Example 3
 
-Mean and median natural gas consumption per square foot, calculated (separately) for population subgroups defined by: 1) housing tenure; 2) housing tenure and census tract. This example illustrates how flexible the `by` argument can be.
+Mean and median natural gas consumption per square foot, calculated (separately) for population subgroups defined by: 1) rent/own status; 2) rent/own status *and* census tract. This example illustrates how flexible the `by` argument can be.
 
 ``` {r}
 test <- analyze(
   data = my.data,
   ~ mean(btung_per_ft2),
   ~ median(btung_per_ft2),
-  by = list(ten, c(ten, tract10))
+  by = list(rent_own, c(rent_own, tract10))
 )
 ```
+Let's see the results by only rent/own status (should match previous median estimates):
+
+``` {r}
+subset(test, is.na(tract10))
+```
+
+The other rows contain results for unique combinations of rent/own status and tract.

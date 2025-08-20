@@ -6,7 +6,7 @@
 \alias{fusionACS-package}
 \title{fusionACS: Integrated, extensive, and high-resolution microdata of U.S. households and individuals}
 \description{
-This package provides access to data and tools to facilitate otherwise impossible U.S. social survey analyses. A documented pseudo-sample of the underlying fusionACS database is made available, along with functions to allow efficient microdata assembly and analysis. The fusionACS database is the result of statistical fusion of social survey microdata to simulate an extensive and high-resolution survey of U.S. households and individuals (Ummel et al. 2024, Tuccillo et al. 2023).
+This package provides access to data and tools to facilitate otherwise impossible U.S. social survey analyses. A documented pseudo-sample of the underlying fusionACS database is made available, along with functions to allow efficient microdata assembly and analysis. The fusionACS database is the result of statistical fusion of social survey microdata to simulate an extensive and high-resolution survey of U.S. households and individuals (Ummel et al. 2024; Tuccillo et al. 2023).
 }
 \seealso{
 Useful links:
@@ -17,11 +17,15 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Kevin Ummel \email{kevin.ummel@yale.edu}
+\strong{Maintainer}: Kevin Ummel \email{kevin.ummel@yale.edu} (Yale University)
 
 Other contributors:
 \itemize{
-  \item Karthik Akkiraju \email{karthik.akkiraju@yale.edu} [contributor]
+  \item Karthik Akkiraju (University of British Columbia) [contributor]
+  \item Narasimha Rao (Yale University) [contributor]
+  \item Daniel Aldana Cohen (University of California, Berkeley) [contributor]
+  \item Cora Kingdon (University of California, Berkeley) [contributor]
+  \item Miguel Poblete-Cazenave (Vrije Universiteit Amsterdam) [contributor]
 }
 
 }

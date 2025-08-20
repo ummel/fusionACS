@@ -13,7 +13,7 @@ analyze(data, ..., by = NULL, fun = NULL, cores = get_cores())
 
 \item{by}{Optional variable(s) that collectively define the set of population subgroups for which each analysis is computed. Can be a mix of geographic (e.g. census tract) and/or socio-demographic microdata variables (e.g. poverty status); the latter may be existing variables on disk or custom variables created on-the-fly via \code{fun()}. If \code{NULL}, analysis is done for the whole (national) sample.}
 
-\item{fun}{Function. Optional function for modifying \code{data} prior to analysis.}
+\item{fun}{Function. Optional function for modifying \code{data} prior to analysis. \code{fun(data)} is called internally and the requested analyses performed on the output.}
 
 \item{cores}{Integer. Number of cores used for multithreading in \code{\link[collapse]{collapse-package}} functions. The default is one less than the total available cores.}
 }

@@ -46,7 +46,7 @@ By assessing the variance both within and across implicates, it is possible to c
 
 ### Pooled variance
 
-For any given fusionACS analysis, the point estimates and associated margin of error are calculated using the technique of @Rubin1987. The point estimate, $\bar{\theta}$, is the mean of the individual estimates calculated for each of the $M$ samples:
+For any given fusionACS analysis, the point estimates and associated margin of error are calculated using the technique of @Rubin1987. The point estimate, $\bar{\theta}$, is the mean of the individual estimates calculated for each of the $M$ implicates:
 
 $$
 \bar{\theta} = \frac{1}{M} \sum_{i=1}^{M} \hat{\theta}_i
@@ -95,7 +95,9 @@ $$
 f(m) \approx \frac{p_2 - p_1}{Q(p_2) - Q(p_1)}
 $$
 
-where $Q(p)$ is the weighted quantile function, and $p_1$ and $p_2$ are probabilities close to the median (0.475 and 0.525, by default). Implementation via the *collapse* package leverages a single, radix-based ordering of the input to efficiently compute the median, $Q(p_1)$, and $Q(p_2)$. This allows the standard error to be estimated at little additional cost beyond computation of the median itself. If $f(m)$ is undefined, the code falls back to the conservative approximation of @Tukey1977:
+where $Q(p)$ is the weighted quantile function, and $p_1$ and $p_2$ are probabilities close to the median (0.475 and 0.525, by default). Implementation via the *collapse* package leverages a single, radix-based ordering of the input to efficiently compute the median, $Q(p_1)$, and $Q(p_2)$. This allows the standard error to be estimated at little additional cost beyond computation of the median itself.
+
+If $f(m)$ is undefined, the code falls back to the conservative approximation of @Tukey1977:
 
 $$
 SE(\hat{\theta}_{\text{median}}) \approx SE(\hat{\theta}_{\text{mean}})  \cdot \frac{\pi}{2}
@@ -129,9 +131,9 @@ $$
 Having calculated $\text{Var}_{\text{combined}}$ and its component variances, the degrees of freedom is calculated using the formula of @Barnard1999. Compared to the original @Rubin1987 degrees of freedom, this formulation allows for unequal within-sample variances and is more accurate for small samples.
 
 $$
-\nu = (k - 1) \left( 1 + \frac{ \frac{1}{k} \sum_{i=1}^{k} \text{Var}(\hat{\theta}_i) }{ \text{Var}_{\text{between}} } \right)^2
+\nu = (M - 1) \left( 1 + \frac{ \frac{1}{M} \sum_{i=1}^{M} \text{Var}(\hat{\theta}_i) }{ \text{Var}_{\text{between}} } \right)^2
 \bigg/
-\left( \frac{1}{k - 1} + \frac{1}{k^2} \cdot \frac{ \sum_{i=1}^{k} \text{Var}(\hat{\theta}_i)^2 }{ \text{Var}_{\text{between}}^2 } \right)
+\left( \frac{1}{M - 1} + \frac{1}{M^2} \cdot \frac{ \sum_{i=1}^{M} \text{Var}(\hat{\theta}_i)^2 }{ \text{Var}_{\text{between}}^2 } \right)
 $$
 
 In keeping with the convention used by the U.S. Census Bureau for published ACS estimates, fusionACS returns the 90% margin of error:

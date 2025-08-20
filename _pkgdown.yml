@@ -21,7 +21,6 @@ home:
       - logo
       - links
       - authors
-      - citation
       - license
     components:
       logo:

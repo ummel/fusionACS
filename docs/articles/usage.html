@@ -66,7 +66,10 @@
 <div class="section level3">
 <h3 id="package-install-and-setup">Package install and setup<a class="anchor" aria-label="anchor" href="#package-install-and-setup"></a>
 </h3>
-<p>Install the latest package version from Github.</p>
+<p>Install the latest package version from Github. Dependencies include
+the <a href="https://arrow.apache.org/docs/r/" class="external-link">arrow</a> package to
+allow for fast, platform- and language-independent data access. The
+install may take a few minutes.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"ummel/fusionACS"</span><span class="op">)</span></span></code></pre></div>
 <p>Load the package.</p>
@@ -99,13 +102,12 @@ subset of the pseudo-sample.</p>
 <p>Assemble household income (hincp), housing tenure (ten), and state of
 residence from the ACS, plus natural gas consumption (btung), square
 footage (totsqft_en), and the main space heating equipment type (equipm)
-from the 2020 RECS, plus pseudo-assignment of county and tract from
-UrbanPop. Return nationwide household data for ACS respondents in year
-2019.</p>
+from the 2020 RECS, plus pseudo-assignment of county and tract (2010
+geographic definitions). Return nationwide household microdata.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">my.data</span> <span class="op">=</span> <span class="fu"><a href="../reference/assemble.html">assemble</a></span><span class="op">(</span></span>
-<span>    variables <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">hincp</span>, <span class="va">ten</span>, <span class="va">btung</span>, <span class="va">totsqft_en</span>, <span class="va">equipm</span>, <span class="va">state_name</span>, <span class="va">county10</span>, <span class="va">tract10</span><span class="op">)</span>, </span>
-<span>    respondent <span class="op">=</span> <span class="st">"household"</span></span>
+<span>  variables <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">hincp</span>, <span class="va">ten</span>, <span class="va">btung</span>, <span class="va">totsqft_en</span>, <span class="va">equipm</span>, <span class="va">state_name</span>, <span class="va">county10</span>, <span class="va">tract10</span><span class="op">)</span>, </span>
+<span>  respondent <span class="op">=</span> <span class="st">"household"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## → Returning UrbanPop household-level weights</span></span></code></pre>
 <pre><code><span><span class="co">## → Auto-set 'year' argument to 2015:2019 (required for UrbanPop weights)</span></span></code></pre>
@@ -119,6 +121,14 @@ UrbanPop. Return nationwide household data for ACS respondents in year
 <span><span class="co">##  totsqft_en   RECS    2015   FALSE</span></span></code></pre>
 <pre><code><span><span class="co">## <span style="color: #BBBB00;">!</span> If this is not the intended result, use backticked selector(s) in 'variables'. For example:</span></span>
 <span><span class="co">## `RECS_2015:btung`, `RECS_2015:equipm`, `RECS_2015:totsqft_en`</span></span></code></pre>
+<p>Because we requested county and tract (which require UrbanPop
+weights), <code><a href="../reference/assemble.html">assemble()</a></code> automatically returned microdata
+observations for 2015-2019; the whole period is required to use the
+UrbanPop weights. Also note that the variables <code>btung</code>,
+<code>equipm</code>, and <code>totsqft_en</code> are present in both the
+2015 and 2020 RECS fusion output. <code><a href="../reference/assemble.html">assemble()</a></code> automatically
+selected the 2020 vintage (which we want), but it is also possible to
+manually specify the desired donor survey for a variable.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">my.data</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Key: &lt;M, year, hid&gt;</span></span>
@@ -158,11 +168,11 @@ UrbanPop. Return nationwide household data for ACS respondents in year
 <div class="section level4">
 <h4 id="example-2">Example 2<a class="anchor" aria-label="anchor" href="#example-2"></a>
 </h4>
-<p>Same as above but for years 2017-2019 and includes optional
-expressions to: 1) Restrict to households in the state of Texas that
-used natural gas; 2) Create a new variable (btung_per_ft2) that measures
-consumption per square foot; and 3) Remove btung and totsqft_en after
-creating the new variable, for convenience.</p>
+<p>Same as above but includes optional expressions to: 1) Restrict to
+households in the state of Texas that used natural gas; 2) Create a new
+variable (btung_per_ft2) that measures consumption per square foot; and
+3) Remove btung and totsqft_en after creating the new variable, for
+convenience.</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">my.data</span> <span class="op">=</span> <span class="fu"><a href="../reference/assemble.html">assemble</a></span><span class="op">(</span></span>
 <span>  variables <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">hincp</span>, <span class="va">ten</span>, <span class="va">btung</span>, <span class="va">totsqft_en</span>, <span class="va">equipm</span>, <span class="va">state_name</span>, <span class="va">county10</span>, <span class="va">tract10</span><span class="op">)</span>, </span>
@@ -226,7 +236,7 @@ generated via <code><a href="../reference/assemble.html">assemble()</a></code>.<
 <p>Calculate mean natural gas consumption per square foot. Since no
 <code>by</code> argument is specified, the analysis applies to all
 observations in <code>my.data</code>; i.e. all households in Texas in
-2017-2019 that used natural gas.</p>
+2015-2019 that used natural gas.</p>
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">test</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/analyze.html">analyze</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">my.data</span>,</span>
@@ -253,15 +263,43 @@ results.</p>
 </h4>
 <p>Same as above but also request <em>median</em> natural gas
 consumption per square foot and the proportion of households using each
-type of heating equipment (equipm). Calculate estimates for
-sub-populations defined by housing tenure (ten).</p>
+type of heating equipment (equipm). We will calculate separate estimates
+for homeowners and renters.</p>
+<p>The ACS <code>ten</code> (housing tenure) variable contains the
+following levels:</p>
 <div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">my.data</span><span class="op">$</span><span class="va">ten</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## [1] Owned free and clear                                   </span></span>
+<span><span class="co">## [2] Owned with mortgage or loan (include home equity loans)</span></span>
+<span><span class="co">## [3] Rented                                                 </span></span>
+<span><span class="co">## [4] Occupied without payment of rent                       </span></span>
+<span><span class="co">## 4 Levels: Owned with mortgage or loan (include home equity loans) ...</span></span></code></pre>
+<p>Let’s add a custom housing tenure variable to <code>my.data</code>
+that collapses <code>ten</code> into just two categories: “Renters” and
+“Homeowners”. There are many ways to code this, but here’s a clear
+syntax:</p>
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">my.data</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
+<span>  .data <span class="op">=</span> <span class="va">my.data</span>,</span>
+<span>  rent_own <span class="op">=</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/case_when.html" class="external-link">case_when</a></span><span class="op">(</span></span>
+<span>    <span class="va">ten</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'Occupied without payment of rent'</span>, <span class="st">'Rented'</span><span class="op">)</span> <span class="op">~</span> <span class="st">'Renters'</span>,</span>
+<span>    <span class="va">ten</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'Owned free and clear'</span>, <span class="st">'Owned with mortgage or loan (include home equity loans)'</span><span class="op">)</span> <span class="op">~</span> <span class="st">'Homeowners'</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p>Alternatively, we could create <code>rent_own</code> within the
+original <code><a href="../reference/assemble.html">assemble()</a></code> call, analogous to how we created
+<code>btung_per_ft2</code>. Or we could take the code above, put it in a
+function, and pass that function to the custom <code>fun</code> argument
+in <code>analyze</code>. All of these are valid ways to manipulate the
+microdata prior to analysis.</p>
+<p>Now we calculate our desired estimates:</p>
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">test</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/analyze.html">analyze</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">my.data</span>,</span>
 <span>  <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">btung_per_ft2</span><span class="op">)</span>,</span>
 <span>  <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/stats/median.html" class="external-link">median</a></span><span class="op">(</span><span class="va">btung_per_ft2</span><span class="op">)</span>,</span>
 <span>  <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">equipm</span><span class="op">)</span>,</span>
-<span>  by <span class="op">=</span> <span class="va">ten</span></span>
+<span>  by <span class="op">=</span> <span class="va">rent_own</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Computing estimates for categorical analyses:</span></span>
 <span><span class="co">##  ~ mean(equipm) </span></span>
@@ -269,52 +307,47 @@ sub-populations defined by housing tenure (ten).</p>
 <span><span class="co">##  ~ mean(btung_per_ft2)</span></span>
 <span><span class="co">##  ~ median(btung_per_ft2) </span></span>
 <span><span class="co">## Computing final point estimates and margin of error</span></span></code></pre>
-<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">test</span></span></code></pre></div>
-<pre><code><span><span class="co">## <span style="color: #949494;"># A tibble: 48 × 8</span></span></span>
-<span><span class="co">##    lhs                  rhs             type  ten   level  N_eff     est     moe</span></span>
-<span><span class="co">##    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">## <span style="color: #BCBCBC;"> 1</span> mean_btung_per_ft2   mean(btung_per… mean  Occu… <span style="color: #BB0000;">NA</span>     <span style="text-decoration: underline;">1</span>409. 22.0    0.745  </span></span>
-<span><span class="co">## <span style="color: #BCBCBC;"> 2</span> mean_btung_per_ft2   mean(btung_per… mean  Owne… <span style="color: #BB0000;">NA</span>    <span style="text-decoration: underline;">29</span>983  20.2    0.145  </span></span>
-<span><span class="co">## <span style="color: #BCBCBC;"> 3</span> mean_btung_per_ft2   mean(btung_per… mean  Owne… <span style="color: #BB0000;">NA</span>    <span style="text-decoration: underline;">32</span>408  19.0    0.120  </span></span>
-<span><span class="co">## <span style="color: #BCBCBC;"> 4</span> mean_btung_per_ft2   mean(btung_per… mean  Rent… <span style="color: #BB0000;">NA</span>    <span style="text-decoration: underline;">15</span>373  22.7    0.220  </span></span>
-<span><span class="co">## <span style="color: #BCBCBC;"> 5</span> median_btung_per_ft2 median(btung_p… medi… Occu… <span style="color: #BB0000;">NA</span>     <span style="text-decoration: underline;">1</span>409. 18.5    0.508  </span></span>
-<span><span class="co">## <span style="color: #BCBCBC;"> 6</span> median_btung_per_ft2 median(btung_p… medi… Owne… <span style="color: #BB0000;">NA</span>    <span style="text-decoration: underline;">29</span>983  17.4    0.139  </span></span>
-<span><span class="co">## <span style="color: #BCBCBC;"> 7</span> median_btung_per_ft2 median(btung_p… medi… Owne… <span style="color: #BB0000;">NA</span>    <span style="text-decoration: underline;">32</span>408  16.6    0.117  </span></span>
-<span><span class="co">## <span style="color: #BCBCBC;"> 8</span> median_btung_per_ft2 median(btung_p… medi… Rent… <span style="color: #BB0000;">NA</span>    <span style="text-decoration: underline;">15</span>373  19.7    0.222  </span></span>
-<span><span class="co">## <span style="color: #BCBCBC;"> 9</span> mean_equipm          mean(equipm)    prop  Occu… Buil…  <span style="text-decoration: underline;">1</span>409.  0.017<span style="text-decoration: underline;">3</span> 0.005<span style="text-decoration: underline;">86</span></span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">10</span> mean_equipm          mean(equipm)    prop  Occu… Buil…  <span style="text-decoration: underline;">1</span>409.  0.094<span style="text-decoration: underline;">0</span> 0.012<span style="text-decoration: underline;">8</span> </span></span>
-<span><span class="co">## <span style="color: #949494;"># ℹ 38 more rows</span></span></span></code></pre>
 <p>The results suggest the typical (median) renter in Texas consumes
 more natural gas per square foot of living space than homeowners.</p>
-<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">test</span>, <span class="va">rhs</span> <span class="op">==</span> <span class="st">"median(btung_per_ft2)"</span>, select <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">ten</span>, <span class="va">est</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## <span style="color: #949494;"># A tibble: 4 × 2</span></span></span>
-<span><span class="co">##   ten                                                       est</span></span>
-<span><span class="co">##   <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>                                                   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">1</span> Occupied without payment of rent                         18.5</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">2</span> Owned free and clear                                     17.4</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">3</span> Owned with mortgage or loan (include home equity loans)  16.6</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">4</span> Rented                                                   19.7</span></span></code></pre>
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">test</span>, <span class="va">rhs</span> <span class="op">==</span> <span class="st">"median(btung_per_ft2)"</span>, select <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">rent_own</span>, <span class="va">est</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## <span style="color: #949494;"># A tibble: 2 × 2</span></span></span>
+<span><span class="co">##   rent_own     est</span></span>
+<span><span class="co">##   <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">1</span> Homeowners  16.9</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">2</span> Renters     19.6</span></span></code></pre>
 </div>
 <div class="section level4">
 <h4 id="example-3">Example 3<a class="anchor" aria-label="anchor" href="#example-3"></a>
 </h4>
 <p>Mean and median natural gas consumption per square foot, calculated
-(separately) for population subgroups defined by: 1) housing tenure; 2)
-housing tenure and census tract. This example illustrates how flexible
-the <code>by</code> argument can be.</p>
-<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
+(separately) for population subgroups defined by: 1) rent/own status; 2)
+rent/own status <em>and</em> census tract. This example illustrates how
+flexible the <code>by</code> argument can be.</p>
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">test</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/analyze.html">analyze</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">my.data</span>,</span>
 <span>  <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">btung_per_ft2</span><span class="op">)</span>,</span>
 <span>  <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/stats/median.html" class="external-link">median</a></span><span class="op">(</span><span class="va">btung_per_ft2</span><span class="op">)</span>,</span>
-<span>  by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">ten</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">ten</span>, <span class="va">tract10</span><span class="op">)</span><span class="op">)</span></span>
+<span>  by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">rent_own</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">rent_own</span>, <span class="va">tract10</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Computing estimates for numerical analyses:</span></span>
 <span><span class="co">##  ~ mean(btung_per_ft2)</span></span>
 <span><span class="co">##  ~ median(btung_per_ft2) </span></span>
 <span><span class="co">## Computing final point estimates and margin of error</span></span></code></pre>
+<p>Let’s see the results by only rent/own status (should match previous
+median estimates):</p>
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">test</span>, <span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">tract10</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## <span style="color: #949494;"># A tibble: 4 × 9</span></span></span>
+<span><span class="co">##   lhs                  rhs       type  rent_own tract10 level N_eff   est    moe</span></span>
+<span><span class="co">##   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">1</span> mean_btung_per_ft2   mean(btu… mean  Homeown… <span style="color: #BB0000;">NA</span>      <span style="color: #BB0000;">NA</span>    <span style="text-decoration: underline;">60</span>896  19.5 0.093<span style="text-decoration: underline;">3</span></span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">2</span> mean_btung_per_ft2   mean(btu… mean  Renters  <span style="color: #BB0000;">NA</span>      <span style="color: #BB0000;">NA</span>    <span style="text-decoration: underline;">16</span>662  22.6 0.211 </span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">3</span> median_btung_per_ft2 median(b… medi… Homeown… <span style="color: #BB0000;">NA</span>      <span style="color: #BB0000;">NA</span>    <span style="text-decoration: underline;">60</span>896  16.9 0.087<span style="text-decoration: underline;">5</span></span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">4</span> median_btung_per_ft2 median(b… medi… Renters  <span style="color: #BB0000;">NA</span>      <span style="color: #BB0000;">NA</span>    <span style="text-decoration: underline;">16</span>662  19.6 0.213</span></span></code></pre>
+<p>The other rows contain results for unique combinations of rent/own
+status and tract.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

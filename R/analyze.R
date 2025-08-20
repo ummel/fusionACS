@@ -6,7 +6,7 @@
 #' @param data Data frame. fusionACS microdata pseudo-sample returned by \link{assemble}.
 #' @param ... Formulas. Used to define the desired analyses. See Examples.
 #' @param by Optional variable(s) that collectively define the set of population subgroups for which each analysis is computed. Can be a mix of geographic (e.g. census tract) and/or socio-demographic microdata variables (e.g. poverty status); the latter may be existing variables on disk or custom variables created on-the-fly via \code{fun()}. If \code{NULL}, analysis is done for the whole (national) sample.
-#' @param fun Function. Optional function for modifying \code{data} prior to analysis.
+#' @param fun Function. Optional function for modifying \code{data} prior to analysis. \code{fun(data)} is called internally and the requested analyses performed on the output.
 #' @param cores Integer. Number of cores used for multithreading in \code{\link[collapse]{collapse-package}} functions. The default is one less than the total available cores.
 #'
 # Required for full computation but not necessary for pseudo-microdata

@@ -1,10 +1,14 @@
 Package: fusionACS
 Title: Integrated, extensive, and high-resolution microdata of U.S.
     households and individuals
-Version: 0.0.11
+Version: 0.0.12
 Authors@R: c(
-    person("Kevin", "Ummel", , "kevin.ummel@yale.edu", role = c("aut", "cre")),
-    person("Karthik", "Akkiraju", , "karthik.akkiraju@yale.edu", role = "ctb")
+    person("Kevin", "Ummel", email = "kevin.ummel@yale.edu", role = c("aut", "cre"), comment = c(affiliation = "Yale University")),
+    person("Karthik", "Akkiraju", role = "ctb", comment = c(affiliation = "University of British Columbia")),
+    person("Narasimha", "Rao", role = "ctb", comment = c(affiliation = "Yale University")),
+    person("Daniel", "Aldana Cohen", role = "ctb", comment = c(affiliation = "University of California, Berkeley")),
+    person("Cora", "Kingdon", role = "ctb", comment = c(affiliation = "University of California, Berkeley")),
+    person("Miguel", "Poblete-Cazenave", role = "ctb", comment = c(affiliation = "Vrije Universiteit Amsterdam"))
   )
 Description: This package provides access to data and tools to facilitate
     otherwise impossible U.S. social survey analyses. A documented
@@ -13,7 +17,7 @@ Description: This package provides access to data and tools to facilitate
     analysis. The fusionACS database is the result of statistical fusion
     of social survey microdata to simulate an extensive and
     high-resolution survey of U.S. households and individuals (Ummel et
-    al. 2024, Tuccillo et al. 2023).
+    al. 2024; Tuccillo et al. 2023).
 License: GPL (>= 3)
 URL: https://ummel.github.io/fusionACS, https://github.com/ummel/fusionACS
 Depends: 
