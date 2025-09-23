@@ -246,6 +246,9 @@ assemble <- function(variables,
     unique()
   plist <- file.path(directory, plist)
 
+  # Catch and abort case where only UrbanPop geographic variables are requested
+  if (length(plist) == 0) cli_abort("You need to specify 'variables' other than an UrbanPop geographic variables")
+
   # Are geographic variables requested (other than 'puma10')?
   use.geo <- "geography" %in% filter(dv, variable != 'puma10')$survey
 
@@ -523,8 +526,6 @@ assemble <- function(variables,
 
 #---------
 #---------
-
-# separate_dots() from fusionACS::assemble()
 
 separate_dots <- function(dots) {
 
