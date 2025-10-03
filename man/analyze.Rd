@@ -23,7 +23,6 @@ Analyze a fusionACS microdata pseudo-sample created by \link{assemble}. Efficien
 \examples{
 my.data <- assemble(
  variables = c(hincp, np, btung, totsqft_en, acequipm_pub, state_name, county10, tract10),
- year = 2019,
  respondent = "household",
  state_name == "Texas"
 )
@@ -33,6 +32,6 @@ test <- analyze(
   mean_btung ~ mean(btung),
   ~median(totsqft_en),
   ~mean(acequipm_pub),
-  by = list(np, c(state_name, county10, tract10))
+  by = list(np, c(np, county10), tract10)
 )
 }

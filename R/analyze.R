@@ -18,7 +18,6 @@
 #' @examples
 #'my.data <- assemble(
 #'  variables = c(hincp, np, btung, totsqft_en, acequipm_pub, state_name, county10, tract10),
-#'  year = 2019,
 #'  respondent = "household",
 #'  state_name == "Texas"
 #')
@@ -28,18 +27,24 @@
 #'   mean_btung ~ mean(btung),
 #'   ~median(totsqft_en),
 #'   ~mean(acequipm_pub),
-#'   by = list(np, c(state_name, county10, tract10))
+#'   by = list(np, c(np, county10), tract10)
 #' )
 #' @export
 
 #---------------
 
-# source("data/utils.R")
-# data <- assemble(variables = c(hincp, np, cookfuel, hotma, dollarel, state_name, county10), year = 2015:2019, respondent = 'household', state_name == "Texas")
+# library(rlang)
+# library(tidyverse)
+# library(data.table)
+# library(collapse)
+# library(arrow)
+# library(fusionACS)
+# source("R/utils.R")
+# data <- fusionACS::assemble(variables = c(hincp, np, cookfuel, hotma, dollarel, state_name, county10, tract10), respondent = 'household', state_name == "Texas")
 # analyses <- collect_formulas(~ mean(hotma), ~mean(cookfuel), ~mean(dollarel), ~median(dollarel))
-# by = list('np', c('np', 'county10'))
+# by = list('np', c('np', 'county10'), 'tract10')
 # fun = NULL
-# cores = ncores
+# cores = fusionACS::get_cores()
 
 #--------
 
@@ -137,10 +142,6 @@ analyze <- function(data,
 
   #---
 
-  #TESTING
-  #blist <- list("np", c("np", "region"))
-  #blist <- list("region", c("state", "rac1p"))
-
   # Parse the 'by' argument
   expr <- substitute(by)
   blist <- if (missing(by) || is.null(expr) || identical(expr, quote(NULL))) {
@@ -149,12 +150,24 @@ analyze <- function(data,
     parse_by(expr)
   }
 
+  #TESTING
+  #blist = list()  # To test NO groups
+  #blist <- by  # If testing manually
+
+  # Create the by-list containing possibly composite by-variables (e.g. "V1__V2")
   blist <- setNames(blist, lapply(blist, paste, collapse = "__"))
   bvars <- unique(unlist(blist))
 
   # An analysis variable cannot be in 'by'
   err <- intersect(avars, bvars)
   if (length(err)) stop("Analysis variables cannot also be in the 'by' argument: ", paste(err, collapse = ", "))
+
+  # Retain the columns class (and levels) of the 'by' variables
+  # This is used at end to ensure the final output has the correct classes/levels
+  if (length(bvars)) {
+    bclass <- lapply(get_vars(data, bvars), class)
+    blevel <- lapply(get_vars(data, bvars), levels)
+  }
 
   #---
 
@@ -222,7 +235,7 @@ analyze <- function(data,
 
   #---
 
-  # Do categorical analysis....
+  # Process the categorical analyses
 
   # Do the categorical variable calculations
   if (length(acat)) {
@@ -232,63 +245,104 @@ analyze <- function(data,
     # Variables in 'sim' needed for categorical analyses
     cvars <- unique(avars[acat])
 
-    # The initial calculation
-    grp <- GRP(data, by = c('M', names(blist), cvars), sort = FALSE)
+    #---
 
-    # Columns to drop because no longer needed after initial 'grp' formation
-    drop <- if (length(anum)) setdiff(cvars, avars[anum]) else grp$group.vars
-    get_vars(data, drop) <- NULL
+    # NECESSARY?
+    # Function to check feasibility of eventual data.table::melt() calls
+    # melt() internals restrict nrow(input) x number_of_measure_vars < .Machine$integer.max (about 2 billion)
+    # When this fails, melt() returns an unhelpful "negative length vectors are not allowed" error
+    # This check causes early stopping and returns helpful error message
+    # check_size <- function(x) {
+    #   if (x >= .Machine$integer.max) stop("Number of internal rows exceeds .Machine$integer.max. Use fewer categorical analysis variables or fewer 'by' variables.")
+    # }
+    #
+    # # Check just the two initial melt() operations
+    # check_size(x = uniqueN(data, by = c('M', names(blist), cvars)) * length(blist) * length(cvars))
 
     #---
 
-    # Initial summation by group
-    # This doesn't provide final summation, but it greatly reduces the number of rows without requiring any data transformation
-    d <- add_vars(grp$groups, data[, .(weight)] %>%
-                    frename(W = weight) %>%
-                    fmutate(W2 = W ^ 2) %>%
-                    fsum(g = grp, nthreads = cores))
+    # Temporary modification of 'data' prior to pivot() call
+    setnames(data, old = "weight", new = "W")
+    data[, W2 := W ^ 2]
 
-    # just for reference/testing to see the dimensionality reduction
-    #nrow(d) / nrow(data)
+    # Initial pivot and summation
+    d <- pivot(
+      data = data,
+      ids = c(names(blist), cvars),  # Row identifiers
+      names = "M",  # Column names derived from M
+      values = c("W", "W2"),  # Values to fill the table
+      how = "wider",  # Pivoting to wide format
+      FUN = "sum",  # Aggregation function (quoted name is MUCH faster)
+      nthreads = cores
+    )
+    cat(" -- Completed initial pivot-summation\n")
+
+    # Columns to drop from 'data' because no longer needed
+    # This is simply to reduce memory consumption of 'data'
+    setnames(data, old = "W", new = "weight") # To make 'data' safe for numeric analysis code later
+    drop <- if (length(anum)) setdiff(cvars, avars[anum]) else cvars
+    get_vars(data, c(drop, "W2")) <- NULL
 
     #---
 
-    # NECESSSARY?
-    # Coerce 'by' variables to character to avoid any variable type conflicts during melt
-    # For example, if the 'by' variables mix integer and factor
-    #d[, (names(blist)) := lapply(.SD, as.character), .SDcols = names(blist)]
-
-    # Melt by grouping variables ('blist')
+    # Melt by the 'by' variables
     if (length(bvars)) {
-      d[, (names(blist)) := lapply(.SD, as.character), .SDcols = names(blist)]
-      d <- melt(d, measure.vars = names(blist), variable.name = "GRP_NAME", value.name = "GRP_VALUE", na.rm = TRUE)  # data.table::melt()
-      #d <- collapse::pivot(d, values = names(blist), names = list("GRP_NAME", "GRP_VALUE"), na.rm = TRUE)  # collapse::pivot(); slightly faster but buggy?
-      if (is.character(d$GRP_VALUE)) d[, GRP_VALUE := as.factor(GRP_VALUE)]
+      suppressWarnings(
+        d <- melt(d, measure.vars = names(blist), variable.name = "GRP_NAME", value.name = "GRP_VALUE", variable.factor = TRUE, value.factor = TRUE, na.rm = TRUE)
+      )
     } else {
       # Placeholders if no 'by' argument specified
       d[, `:=`(GRP_NAME = 1L, GRP_VALUE = 1L)]
     }
 
-    #---
+    # collapse::pivot() is somewhat faster, BUT melt() has the advantage that 'value.factor' argument automatically converts the value column to factor
+    # I also see buggy behavior at times...
+    # Extract factor levels for the 'blist' variables
+    # blist.levels <- lapply(names(blist), function(v) levels(data[[v]]))
+    # d <- collapse::pivot(d, values = names(blist), names = list("GRP_NAME", "GRP_VALUE"), how = "longer", na.rm = TRUE)
 
-    # Melt by categorical analysis variables ('cvars')
-    d[, (cvars) := lapply(.SD, as.character), .SDcols = cvars]
-    d <- melt(d, measure.vars = cvars, variable.name = "VAR_NAME", value.name = "VAR_LEVEL", na.rm = TRUE)
-    if (is.character(d$VAR_LEVEL)) d[, VAR_LEVEL := as.factor(VAR_LEVEL)]
-
-    # Melt by 'cvars' using collapse::pivot()
-    # collapse::pivot(); slightly faster but buggy?
-    #d <- pivot(d, values = cvars, names = list("VAR_NAME", "VAR_LEVEL"), na.rm = TRUE)
-
-    grp <- GRP(d, by = c("M", "GRP_NAME", "GRP_VALUE", "VAR_NAME", "VAR_LEVEL"), sort = FALSE)
+    # Intermediary summation
+    # This chunk can be removed entirely, and the same final result is achieved
+    # BUT it is useful for very large data to reduce the number of rows prior to subsequent melt() call
+    grp <- GRP(d, by = c("GRP_NAME", "GRP_VALUE", cvars), sort = FALSE)
     get_vars(d, grp$group.vars) <- NULL
-
-    # Sum W and W2, by group, in parallel
-    d <- add_vars(grp$groups, fsum(x = d, g = grp, nthreads = cores))
+    d <- d %>%
+      fsum(g = grp, nthreads = cores) %>%
+      add_vars(grp$groups)
+    rm(grp)
+    cat(" -- Completed intermediate summation\n")
 
     #---
 
-    # TO DO: This needs to do a better job of picking up all potential combinations of groups, even those unobserved
+    # Melt by 'cvars'
+    suppressWarnings(
+      d <- melt(d, measure.vars = cvars, variable.name = "VAR_NAME", value.name = "VAR_LEVEL", value.factor = TRUE, na.rm = TRUE)
+    )
+
+    # collapse::pivot() is somewhat faster, BUT melt() has the advantage that 'value.factor' argument automatically converts the value column to factor
+    # I also see buggy behavior at times...
+    # Extract factor levels for the 'cvars' variables
+    # cvars.levels <- lapply(cvars, function(v) levels(data[[v]]))
+    # d <- collapse::pivot(d, values = cvars, names = list("VAR_NAME", "VAR_LEVEL"), how = "longer", na.rm = TRUE)
+
+    grp <- GRP(d, by = c("GRP_NAME", "GRP_VALUE", "VAR_NAME", "VAR_LEVEL"), sort = FALSE)
+    get_vars(d, grp$group.vars) <- NULL
+    d <- d %>%
+      fsum(g = grp, nthreads = cores) %>%
+      add_vars(grp$groups)
+    rm(grp)
+    cat(" -- Completed final summation\n")
+
+    #---
+
+    # Final data melt
+    # Melt the columns containing W_ and W2_ followed by 1 or 2 digits
+    d <- melt(d, measure.vars = patterns(W  = "^W_\\d{1,2}$", W2 = "^W2_\\d{1,2}$"), variable.name = "M")
+    cat(" -- Completed final melt\n")
+
+    #---
+
+    # TO DO: Could this chunk do a better job of picking up all potential combinations of groups, even those unobserved?
 
     # Add unobserved combinations, efficiently
 
@@ -337,13 +391,11 @@ analyze <- function(data,
 
     #---
 
-    # Final calculation
+    # Calculate the group denominators (Wsum, W2sum)
     grp <- GRP(d, by = c("M", "GRP_NAME", "GRP_VALUE", "VAR_NAME"), sort = FALSE)
     add_vars(d) <- fselect(d, W, W2) %>%
       fsum(g = grp, TRA = "replace", nthreads = cores) %>%
       frename(Wsum = W, W2sum = W2)
-
-    b <- copy(d)
 
     # Calculate estimate and effective sample size
     # This correctly returns NA's if the group in question has no observations (i.e. Wsum == 0); such cases are dropped below
@@ -371,9 +423,9 @@ analyze <- function(data,
     cout <- NULL
   }
 
-  #---
+  #-------------
 
-  # Process the 'anum' analyses in a collap() call
+  # Process the numeric analyses
 
   if (length(anum)) {
 
@@ -396,6 +448,7 @@ analyze <- function(data,
     # For example, if the 'by' variables mix integer and factor
     #d[, (names(blist)) := lapply(.SD, as.character), .SDcols = names(blist)]
 
+    # TO DO: Update this to remove as.character(), etc. See how it is done for categorical variables.
     # Melt by group variables
     if (length(bvars)) {
       d[, (names(blist)) := lapply(.SD, as.character), .SDcols = names(blist)]
@@ -414,8 +467,6 @@ analyze <- function(data,
 
     # Columns to drop because no longer needed after initial 'grp' formation
     get_vars(d, grp$group.vars) <- NULL
-
-    b <- copy(d)
 
     # Get the sum of squared weights
     # NOTE: This is not maximally efficient when there are no NA values in 'nvars'
@@ -446,13 +497,14 @@ analyze <- function(data,
       as.data.frame() %>%
       add_vars(grp$groups)
 
-    # Returns data.table containing the median and its approximate density, by group 'g'
+    # Function to return data.table containing the median and its approximate density, by group 'g'
     median_density <- function(x, g, w, eps = 0.025) {
       p <- 0.5 + c(-eps, 0, eps)
       if (inherits(g, "GRP")) g <- g$group.id
       o <- collapse::radixorder(g, x)
       q <- sapply(p, function(n) collapse::fnth(x, n = n, g = g, w = w, o = o, use.g.names = FALSE, check.o = FALSE))  # Also accepts 'nthreads' argument
-      f.med <- (p[3] - p[1]) / (q[, 3] - q[, 1]) # Approximate density at median
+      if (is.vector(q)) q <- t(as.matrix(q))  # Handles case of no 'by' variables
+      f.med <- (p[3] - p[1]) / (q[, 3, drop = FALSE] - q[, 1, drop = FALSE]) # Approximate density at median
       return(data.table(median = q[, 2], density = f.med))
     }
 
@@ -507,18 +559,21 @@ analyze <- function(data,
 
   } else {
     nout <- data.table()
+    rm(data)
   }
 
   #---
 
-  # Remove the principle data objects
-  #rm(sim, static, ind)
-
   # Combine analysis output data frames
-  result <- rbind(nout, cout, fill = TRUE) %>%
-    widen_groups()
+  result <- rbind(nout, cout, fill = TRUE)
 
-  #rm(nout, cout)
+  result <- if (length(bvars)) {
+    make_groups_safe(result)
+  } else {
+    select(result, -GRP_NAME, -GRP_VALUE)
+  }
+
+  rm(nout, cout)
 
   #----------
 
@@ -531,10 +586,30 @@ analyze <- function(data,
     N_eff = mean(n_eff),
     est = mean(EST),
     ubar = mean(SE ^ 2),
-    #b = var(EST),  # Returns NA when .N = 1
-    b = ifelse(.N == 1, 0, var(EST)),  # Returns 0 when .N = 1, which allows 'se' to calculate even if only single implicate
+    b = data.table::fifelse(.N == 1, 0, var(EST)),  # Returns 0 when .N = 1, which allows 'se' to calculate even if only single implicate
     term2_sum = sum((SE ^ 2) ^ 2)
-  ), by = c(bvars, "level", "ANALYSIS")]
+  ), by = c(names(blist), "level", "ANALYSIS")]
+
+  #---
+
+  # Now clean-up/separate the 'by' columns
+  result <- split_composite_cols(result)
+
+  # Ensure the 'by' variables have correct class and levels
+  # The output should match the original data inputs
+  if (length(bvars)) {
+    for (v in bvars) {
+      x <- as.character(result[[v]])
+      if ("factor" %in% bclass[[v]]) {
+        set(result, i = NULL, j = v, value = factor(x, levels = blevel[[v]], ordered = "ordered" %in% bclass[[v]]))
+      }
+      if (bclass[v] == "character") set(result, i = NULL, j = v, value = x)
+      if (bclass[v] == "logical") set(result, i = NULL, j = v, value = as.logical(x))
+      if (bclass[v] == "integer") set(result, i = NULL, j = v, value = as.integer(x))
+    }
+  }
+
+  #---
 
   # Add final output variables
   # This uses mutate() to allow for sequential evaluation of the variables
@@ -545,9 +620,9 @@ analyze <- function(data,
       term1 = (1 + (ubar / b)) ^ 2,
       term2 = (1 / (n - 1)) + (1 / (n ^ 2)) * term2_sum / b ^ 2,
       df = (n - 1) * term1 / term2,
-      df = fifelse(!is.finite(df), N_eff - 1, df), # Fallback for cases where 'df' cannot be calculated (usually because b = 0)
+      df = data.table::fifelse(!is.finite(df), N_eff - 1, df), # Fallback for cases where 'df' cannot be calculated (usually because b = 0)
       moe = se * suppressWarnings(qt(p = 0.95, df)),
-      est = fifelse(!is.finite(moe), NA, est),  # Fallback to set estimate to NA if the 'moe' cannot be calculated (usually because N_eff <= 1)
+      est = data.table::fifelse(!is.finite(moe), NA, est),  # Fallback to set estimate to NA if the 'moe' cannot be calculated (usually because N_eff <= 1)
       cv = 100 * (moe / 1.645) / est    # Coefficient of variation (https://sites.tufts.edu/gis/files/2013/11/Amercian-Community-Survey_Margin-of-error-tutorial.pdf)
     ) %>%
 
@@ -558,28 +633,17 @@ analyze <- function(data,
            type = ifelse(!is.na(level) & type == "mean",  "prop", type),
            type = ifelse(!is.na(level) & type == "sum",  "count", type)) %>%
 
-    # Arranges row order of output
-    arrange(i, !!!rlang::syms(bvars), level) %>%
-
     # Replace NaN from zero division with normal NA
     mutate_all(tidyr::replace_na, replace = NA) %>%
 
-    # NOTE: This is not safe for tract, for example, since it converts to double
-    # TO DO: Enforce original input type in the output!!!
-    # Convert data types, preserving leading zeros in strings (e.g. '012345')
-    # Useful for character grouping variables that can be typed as integer, logical, etc.
-    #mutate_all(~ if (any(grepl("^0[0-9]+$", .x) & .x != "0")) {as.character(.x)} else {type.convert(.x, as.is = TRUE)}) %>%
-
-    # Clean up precision and integer type
-    mutate_if(is.double, convertInteger, threshold = 1) %>%
-    mutate_if(is.double, signif, digits = 5) %>%
-
-    # Select final variables
-    #select(lhs, rhs, type, all_of(bvars), level, N_eff, est, moe, se, df, cv) %>%
-    #select(lhs, rhs, type, all_of(bvars), level, N_eff, ubar, b, est, moe, se, df, cv) %>%
-
     # Select final variables
     select(lhs, rhs, type, all_of(bvars), level, N_eff, est, moe) %>%
+
+    # Arranges row order of output
+    arrange(i, !!!rlang::syms(bvars), level) %>%
+
+    # Clean up precision of results columns
+    mutate(across(c(N_eff, est, moe), ~ convertInteger(signif(.x, digits = 5), threshold = 1))) %>%
 
     # setattr(name = "var_source", value = var.sources) %>%
     # setattr(name = "analyze_call", value = mcall) %>%
@@ -689,16 +753,32 @@ parse_by <- function(expr) {
 
 #---
 
-widen_groups <- function(dt) {
-
+# This casts the by-group names and values to make the results wide
+# This is necessary to correctly dcast() in cases where groups happen to have identical values on other non-grouping variables (e.g. if two groups are identical sub-populations but labelled differently)
+# NOTE: Not entirely sure about the necessity of this step; don't have a working example showing when/why it matters.
+make_groups_safe <- function(dt) {
   nms <- copy(names(dt))
-  dt[, .GRPID := .I]  # This is necessary to correctly dcast() in cases where groups happen to have identical values on other non-grouping variables (e.g. if two groups are identical sub-populations but labelled differently)
+  dt[, .GRPID := .I]
   keep <- setdiff(names(dt), c('GRP_NAME', 'GRP_VALUE'))
   temp <- dt[, ..keep]
   dt <- dcast(dt[, .(.GRPID, GRP_NAME, GRP_VALUE)], formula = ... ~ GRP_NAME, value.var = "GRP_VALUE")
+  dt <- dt[temp, on = ".GRPID"]
+  dt[, .GRPID := NULL]
+  setcolorder(dt, intersect(nms, names(dt)))
+  return(dt)
+}
+
+#----
+
+# Function to safely split a composite by column (e.g. "V1__V2") into separate columns
+# The composite column is removed
+split_composite_cols <- function(dt) {
+
+  # Composite columns
+  comp_cols <- grep("__", names(dt), value = TRUE)
 
   # Process any composite (more than one variable) by-group columns to reconstitute the original, separated columns
-  for (col in grep("__", names(dt), value = TRUE)) {
+  for (col in comp_cols) {
 
     # Split column name into new variable names
     new_vars <- strsplit(col, "__")[[1]]
@@ -724,10 +804,7 @@ widen_groups <- function(dt) {
 
   }
 
-  # Join original columns
-  dt <- dt[temp, on = ".GRPID"]
-  dt[, .GRPID := NULL]
-  setcolorder(dt, intersect(nms, names(dt)))
   return(dt)
 
 }
+

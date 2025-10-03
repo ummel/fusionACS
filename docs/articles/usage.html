@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">fusionACS</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.11</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.12</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -249,7 +249,7 @@ observations in <code>my.data</code>; i.e. all households in Texas in
 <code class="sourceCode R"><span><span class="va">test</span></span></code></pre></div>
 <pre><code><span><span class="co">## <span style="color: #949494;"># A tibble: 1 × 7</span></span></span>
 <span><span class="co">##   lhs                rhs                 type  level N_eff   est    moe</span></span>
-<span><span class="co">##   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>               <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">##   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>               <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
 <span><span class="co">## <span style="color: #BCBCBC;">1</span> mean_btung_per_ft2 mean(btung_per_ft2) mean  <span style="color: #BB0000;">NA</span>    <span style="text-decoration: underline;">76</span>223  20.3 0.088<span style="text-decoration: underline;">2</span></span></span></code></pre>
 <p>The result has a single row, because no sub-populations were
 requested in this example. The results include a point estimate
@@ -303,6 +303,10 @@ microdata prior to analysis.</p>
 <span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Computing estimates for categorical analyses:</span></span>
 <span><span class="co">##  ~ mean(equipm) </span></span>
+<span><span class="co">##  -- Completed initial pivot-summation</span></span>
+<span><span class="co">##  -- Completed intermediate summation</span></span>
+<span><span class="co">##  -- Completed final summation</span></span>
+<span><span class="co">##  -- Completed final melt</span></span>
 <span><span class="co">## Computing estimates for numerical analyses:</span></span>
 <span><span class="co">##  ~ mean(btung_per_ft2)</span></span>
 <span><span class="co">##  ~ median(btung_per_ft2) </span></span>
@@ -313,7 +317,7 @@ more natural gas per square foot of living space than homeowners.</p>
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">test</span>, <span class="va">rhs</span> <span class="op">==</span> <span class="st">"median(btung_per_ft2)"</span>, select <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">rent_own</span>, <span class="va">est</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## <span style="color: #949494;"># A tibble: 2 × 2</span></span></span>
 <span><span class="co">##   rent_own     est</span></span>
-<span><span class="co">##   <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">##   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
 <span><span class="co">## <span style="color: #BCBCBC;">1</span> Homeowners  16.9</span></span>
 <span><span class="co">## <span style="color: #BCBCBC;">2</span> Renters     19.6</span></span></code></pre>
 </div>
@@ -341,10 +345,10 @@ median estimates):</p>
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">test</span>, <span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">tract10</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## <span style="color: #949494;"># A tibble: 4 × 9</span></span></span>
 <span><span class="co">##   lhs                  rhs       type  rent_own tract10 level N_eff   est    moe</span></span>
-<span><span class="co">##   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">##   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
 <span><span class="co">## <span style="color: #BCBCBC;">1</span> mean_btung_per_ft2   mean(btu… mean  Homeown… <span style="color: #BB0000;">NA</span>      <span style="color: #BB0000;">NA</span>    <span style="text-decoration: underline;">60</span>896  19.5 0.093<span style="text-decoration: underline;">3</span></span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">2</span> mean_btung_per_ft2   mean(btu… mean  Renters  <span style="color: #BB0000;">NA</span>      <span style="color: #BB0000;">NA</span>    <span style="text-decoration: underline;">16</span>662  22.6 0.211 </span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">3</span> median_btung_per_ft2 median(b… medi… Homeown… <span style="color: #BB0000;">NA</span>      <span style="color: #BB0000;">NA</span>    <span style="text-decoration: underline;">60</span>896  16.9 0.087<span style="text-decoration: underline;">5</span></span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">2</span> median_btung_per_ft2 median(b… medi… Homeown… <span style="color: #BB0000;">NA</span>      <span style="color: #BB0000;">NA</span>    <span style="text-decoration: underline;">60</span>896  16.9 0.087<span style="text-decoration: underline;">5</span></span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">3</span> mean_btung_per_ft2   mean(btu… mean  Renters  <span style="color: #BB0000;">NA</span>      <span style="color: #BB0000;">NA</span>    <span style="text-decoration: underline;">16</span>662  22.6 0.211 </span></span>
 <span><span class="co">## <span style="color: #BCBCBC;">4</span> median_btung_per_ft2 median(b… medi… Renters  <span style="color: #BB0000;">NA</span>      <span style="color: #BB0000;">NA</span>    <span style="text-decoration: underline;">16</span>662  19.6 0.213</span></span></code></pre>
 <p>The other rows contain results for unique combinations of rent/own
 status and tract.</p>
